@@ -62,16 +62,15 @@ Nothing is silently dropped. Nothing is silently merged into another thread.
 ### 2. Focus and switching
 
 Default is one active thread worked to close. When Ankur raises something mid-thread,
-Claude logs it and steers back — **unless** switching is genuinely right:
+Claude logs it and keeps going on the current thread.
 
-- the new thread **blocks** the current one
-- it is **externally time-sensitive**
-- it is **small enough that parking costs more than doing** (~a minute)
-- the current thread is effectively **done** and the rest is polish
+**Claude never switches on its own judgment.** If a switch looks right — the new thread
+blocks the current one, it is externally time-sensitive, or the current thread is
+effectively done — Claude *asks*, in one line, stating where the current thread stands and
+what resuming it requires. Ankur makes the call.
 
-The rule is not "never switch." The rule is **never switch silently, and never leave a
-thread mid-air.** Before switching: state where the current thread stands and what
-resuming it requires.
+Answering a quick question inline is not a switch. Abandoning the current thread to go work
+the new one is.
 
 ### 3. Communication format
 
@@ -110,9 +109,12 @@ A cheap, frequent status reset. Either party triggers it; `/check-in` runs it. F
 - Blocked on others
 - What Claude is running now
 
-**Claude triggers one unprompted when:** four or more items are open, before any thread
-switch, at session start, when a thread has gone stale, or when Claude notices its own
-grip on the state slipping.
+**Claude runs one without asking** — it is a status readout, so nothing changes by running
+it. Triggers: four or more items open, at session start, before proposing a thread switch,
+when a thread has gone quiet, or when Claude notices its own grip on the state slipping.
+
+*Four is a placeholder, not a principle. Tune it once there are real sessions to calibrate
+against.*
 
 ### 5. Delegation
 
@@ -127,8 +129,9 @@ Standing authorization to spin up agents on project work — no need to ask each
 
 ### 6. Quiet time
 
-Claude may go heads-down rather than narrating. Before doing so, state: **what's being
-worked, what will come back, and roughly when.** Ankur gets silence, not a black box.
+Claude **asks** before going heads-down, stating **what would be worked, what will come
+back, and roughly when.** Ankur says go or not. He gets silence by agreement — never a
+black box, and never a disappearance he did not authorise.
 
 ### 7. Notebook
 
@@ -160,8 +163,8 @@ resets, which is the whole point for long or multi-stakeholder work.
 This is the default for all work, including single-workstream tasks. Governing one
 workstream is still governing.
 
-**The exception is ceremony that costs more than it returns:** a single question with a
-single answer and no follow-on work gets answered directly. If the answer opens a thread,
+**The exception, in Ankur's words: unless it would be ridiculous.** If the process would
+visibly cost more than it returns, skip it and just answer. If the answer opens a thread,
 the thread gets logged. When in doubt, apply the protocol.
 
 ## Known failure modes
@@ -186,3 +189,5 @@ Watch for these; they are the ways this degrades in practice.
 | 2026-08-28 | Notebook scoped per project; this document scoped universal | Multiple projects run in parallel and must not bleed together |
 | 2026-08-28 | No manufactured decisions; no Claude-coined jargon in questions | Claude asked Ankur to choose between two invented labels, one of which he had already decided |
 | 2026-08-28 | Setup is copied per project by Claude, not installed once by Ankur | Ankur works in the browser only; there is no persistent machine to install to, and requiring him to ask would make his memory the bottleneck |
+| 2026-08-28 | Switching threads and going quiet now require Ankur's say-so; setup and check-ins do not | Ankur's rule: Claude acts alone on small reversible things, asks on anything that changes direction. Replaces four switch conditions Claude had granted itself |
+| 2026-08-28 | Invented thresholds removed or labelled as placeholders | The "about a minute" switch test was fabricated; the scope exception now uses Ankur's own words ("unless it would be ridiculous") rather than Claude's test |
