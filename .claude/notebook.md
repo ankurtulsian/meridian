@@ -9,18 +9,20 @@ move, not reconstructed at the end. Protocol: `.claude/working-style.md`.
 
 ## Active thread
 
-**T4 — Make the working style reach every project**
-*Exit criterion:* starting a brand-new project, Claude knows these rules exist without
-Ankur having to mention Meridian.
-*Status:* answered. Skills enabled on a claude.ai account sync into every cloud session at
-session start; a global `CLAUDE.md` does not reach them at all. The protocol is packaged as
-an uploadable skill at `.claude/portable/working-style.zip`. Remaining: Ankur uploads it.
-Exact menu labels are from search summaries — Anthropic's support site is blocked by this
-container's network, so they are unverified at first hand.
+**T5 — Confirm the uploaded skill actually fires**
+*Exit criterion:* a fresh session, in a project with none of these files, loads the protocol
+on its own and creates a notebook without Ankur mentioning Meridian.
+*Status:* untested and untestable from here. Account skills sync at session *start*, so this
+session cannot see the upload. First real test is the next new session.
 
 ---
 
 ## Closed this session
+
+**T4 — Make the working style reach every project**
+*Closed 2026-08-28.* Verified from primary documentation that a global `CLAUDE.md` cannot
+reach browser sessions and that account-synced skills can. Protocol packaged and uploaded
+by Ankur. Effectiveness not yet observed — see T5.
 
 **T3 — Content review of the working style**
 *Closed 2026-08-28.* Every rule Ankur had not explicitly stated was surfaced, reviewed and
@@ -41,7 +43,8 @@ does the copying unprompted on the first session in any project lacking a notebo
 
 | # | Thread | Raised | Disposition | Note |
 |---|---|---|---|---|
-| T1 | Establish the working style | 2026-08-28 | Substantially done | Protocol written, wired, committed. Amended twice on 2026-08-28. Still open: Ankur's redline of the calibration guesses. |
+| T1 | Establish the working style | 2026-08-28 | **Closed** | Protocol written, reviewed line by line with Ankur, committed. Redline folded into the calibration item below. |
+| W1 | Delegation's "live conversation" exception | 2026-08-28 | Watch, not open | Ankur approved the wording but never answered whether it is too generous a get-out. Claude flags it if it ever leans on it. |
 | P1 | Session-start hook to force-rehydrate the notebook | 2026-08-28 | Parked — proposal | `CLAUDE.md` import covers this today. Stronger guarantee available if the import proves unreliable. Not built; still awaiting Ankur. |
 | P2 | Whether this working style should extend to Cowork | 2026-08-28 | Dropped by Ankur | Scoped to Claude Code. Re-open if relevant. |
 
@@ -49,14 +52,11 @@ does the copying unprompted on the first session in any project lacking a notebo
 
 ## Blocked on Ankur
 
-1. **Upload `.claude/portable/working-style.zip`** on claude.ai — Customize → Skills → +
-   → Create skill → upload → toggle on. Requires Settings → Capabilities → "Code execution
-   and file creation" to be on. This is what makes the protocol reach every project.
+1. **Open this branch for review, or leave it as a branch?** Asked early in the session,
+   never answered, and Claude carried on without it. Seven commits are pushed either way.
 2. **Calibrate the placeholders** in `.claude/working-style.md` — the four-open-items
-   check-in trigger, and "unless it would be ridiculous". Both need real sessions first.
+   check-in trigger, and "unless it would be ridiculous". Needs real sessions first.
 3. **P1** — session-start hook. Low priority; the current mechanism works.
-
-*Nothing here is urgent and nothing blocks progress.*
 
 ## Blocked on others
 
@@ -88,3 +88,4 @@ Closed items. Recorded so they are not relitigated.
 | D16 | Nothing about how we work is committed on Claude's interpretation — wording is shown, then approved, then written | 2026-08-28 | Six amendments had been committed without Ankur confirming a single one captured his intent |
 | D17 | Agents own depth; briefing and checking stay with Claude | 2026-08-28 | Ankur: "an agent has to become the expert on the thread — who else would be." Claude's original rule left deep work with no owner |
 | D18 | Pile B principles 1, 2, 4, 5 stand as written | 2026-08-28 | Reviewed; Ankur differed only on 3 |
+| D19 | Protocol uploaded to Ankur's claude.ai account as a skill | 2026-08-28 | Closes the one gap the per-project files could not: a project Claude has never seen |
