@@ -1,0 +1,15 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 390, "h": 844, "title": "1 · Open" },
+    { "file": "Proposed.dc.html", "x": 490, "y": 0, "w": 390, "h": 844, "title": "2 · It answers" },
+    { "file": "Sparring.dc.html", "x": 980, "y": 0, "w": 390, "h": 844, "title": "3 · You push back" },
+    { "file": "Handover.dc.html", "x": 1470, "y": 0, "w": 390, "h": 844, "title": "4 · To the kitchen" },
+    { "file": "Inspire.dc.html", "x": 0, "y": 1000, "w": 390, "h": 844, "title": "Inspire" },
+    { "file": "Add.dc.html", "x": 490, "y": 1000, "w": 390, "h": 844, "title": "Add" }
+  ],
+  "annotations": [
+    { "id": "flow-note", "x": 0, "y": -130, "w": 700, "text": "The daily path, left to right. Nothing is proposed until you have spoken." },
+    { "id": "side-note", "x": 0, "y": 870, "w": 700, "text": "Reached from the small buttons. Neither one is on the daily path." }
+  ],
+  "launch": { "view": "canvas" }
+}

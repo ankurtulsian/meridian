@@ -7,16 +7,15 @@ move, not reconstructed at the end.
 
 ## Active thread
 
-**Design the screens.** Ankur asked for the visual before any more code. Exit criterion: a
-mockup of the one main screen in every state it passes through — empty, after speaking,
-mid-conversation, and the card that goes to the kitchen — good enough that he and Shruti can
-argue with it rather than imagine it.
+**Screens — done, awaiting reaction.** Six phone screens drafted and published as a canvas
+Ankur can edit directly. Exit criterion met: every state of the main screen exists, plus
+Inspire and Add. Open until he and Shruti have reacted; changes come back here.
 
 ## Parking lot
 
 | # | Thread | Raised | Disposition | Note |
 |---|---|---|---|---|
-| 1 | Separate repo for Rasoi vs staying in Meridian | 28 Aug | Parked | Menu code imports nothing from the restaurant app, so moving is a copy. No urgency. |
+| 1 | Separate repo for Rasoi | 28 Aug | Settled for now | Ankur asked for a folder; `rasoi/` now holds everything and imports nothing from the restaurant app. A separate repo later is still a straight copy. |
 | 2 | A screen for the cook | 28 Aug | Blocked on Ankur | Undecided. Kept cheap: the Hindi card is generated from the plan, so a kitchen page, a WhatsApp send, or nothing are all swaps at the end. |
 | 3 | WhatsApp automation | 28 Aug | Parked | Needs a spare SIM and Meta verification. Copy-and-forward does the same job today. |
 | 4 | Inspire section | 28 Aug | Designed, not built | Ankur said "maybe". It's a view over data already stored, so it stays cheap either way. |
@@ -55,3 +54,5 @@ None.
 | 14 | Screens before plumbing | 28 Aug | The screen decides what the machinery has to produce. |
 | 15 | Real database from the start; keep the rules code independent | 28 Aug | History is the asset. Independence lets the screen or the model change without touching the rules. |
 | 16 | Skip CI, logins, monitoring, component libraries, most tests | 28 Aug | Three people and a cook don't earn it. |
+| 17 | Rasoi lives in its own folder | 28 Aug | Ankur's call. Keeps it clean of the dormant restaurant app and makes moving it out trivial. |
+| 18 | Rasoi looks like itself, not like Meridian | 28 Aug | The restaurant app's cream-and-serif look belongs to a different product being left behind. |
