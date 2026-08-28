@@ -11,16 +11,14 @@
   <style>
     body { margin: 0; font-family: 'IBM Plex Sans', system-ui, sans-serif; }
     a { color: #A96C13; } a:hover { color: #7D4F0D; }
-    .hint { position: absolute; left: 0; right: 0; text-align: center; opacity: 0; animation: cycle 17.5s infinite; }
-    .hint:nth-child(1) { animation-delay: 0s; }
-    .hint:nth-child(2) { animation-delay: 3.5s; }
-    .hint:nth-child(3) { animation-delay: 7s; }
-    .hint:nth-child(4) { animation-delay: 10.5s; }
-    .hint:nth-child(5) { animation-delay: 14s; }
+    .hint { opacity: 0; animation: cycle 16s infinite; }
+    .hint:nth-child(2) { animation-delay: 4s; }
+    .hint:nth-child(3) { animation-delay: 8s; }
+    .hint:nth-child(4) { animation-delay: 12s; }
     @keyframes cycle {
       0%      { opacity: 0; transform: translateY(4px); }
-      3%, 17% { opacity: 1; transform: translateY(0); }
-      20%     { opacity: 0; transform: translateY(-4px); }
+      3%, 22% { opacity: 1; transform: translateY(0); }
+      25%     { opacity: 0; transform: translateY(-4px); }
       100%    { opacity: 0; transform: translateY(-4px); }
     }
     @media (prefers-reduced-motion: reduce) {
@@ -29,71 +27,66 @@
     }
   </style>
 </helmet>
-<div style="width: 390px; height: 844px; background: #F4F6F6; color: #14181B; display: flex; flex-direction: column; overflow: hidden;">
+<div style="width: 390px; height: 844px; background: #F4F6F6; color: #14181B; display: flex; flex-direction: column; gap: 18px; padding: 20px 20px 22px; box-sizing: border-box; overflow: hidden;">
 
-  <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 30px 24px 22px;">
-    <div style="font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.025em;">Rasoi</div>
-    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.1em; color: #8B959C;">THURSDAY · 4:10 PM</div>
-  </div>
-
-  <div style="padding: 0 24px; display: flex; flex-direction: column; gap: 2px;">
-
-    <div style="display: flex; gap: 16px; align-items: baseline; padding: 11px 0;">
-      <div style="width: 74px; flex-shrink: 0; font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.11em; color: #C4CDD1;">BREAKFAST</div>
-      <div style="font-size: 15px; color: #A8B1B7;">Poha, chai</div>
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
+    <div style="display: flex; flex-direction: column; gap: 3px;">
+      <div style="font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.1;">Rasoi</div>
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; font-weight: 500; letter-spacing: 0.1em; color: #8B959C;">THURSDAY · 7:40 AM</div>
     </div>
-
-    <div style="display: flex; gap: 16px; align-items: baseline; padding: 11px 0;">
-      <div style="width: 74px; flex-shrink: 0; font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.11em; color: #C4CDD1;">LUNCH</div>
-      <div style="font-size: 15px; color: #A8B1B7;">Rajma chawal, kachumber</div>
-    </div>
-
-    <div style="display: flex; gap: 16px; align-items: baseline; padding: 13px 0; border-top: 1px solid #DFE5E7; margin-top: 6px;">
-      <div style="width: 74px; flex-shrink: 0; font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.11em; color: #8B959C;">SNACKS</div>
-      <div style="font-size: 17px; color: #C4CDD1;">—</div>
-    </div>
-
-    <div style="display: flex; gap: 16px; align-items: baseline; padding: 13px 0;">
-      <div style="width: 74px; flex-shrink: 0; font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.11em; color: #8B959C;">DINNER</div>
-      <div style="font-size: 17px; color: #C4CDD1;">—</div>
-    </div>
-
-  </div>
-
-  <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 0 24px;">
-
-    <div style="width: 132px; height: 132px; border-radius: 66px; background: #F3E7D3; border: 1.5px solid #A96C13; display: flex; align-items: center; justify-content: center; color: #A96C13;">
-      <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="9" y="2" width="6" height="11.5" rx="3"></rect>
-        <path d="M5.2 11a6.8 6.8 0 0 0 13.6 0"></path>
-        <path d="M12 17.8v3.4"></path>
-      </svg>
-    </div>
-
-    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%;">
-      <div style="font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-size: 20px; font-weight: 600; letter-spacing: -0.01em;">Tap and talk</div>
-      <div style="position: relative; width: 100%; height: 24px;">
-        <div class="hint" style="font-size: 15.5px; color: #8B959C;">“what's for dinner?”</div>
-        <div class="hint" style="font-size: 15.5px; color: #8B959C;">“there's a lot of bhindi lying around”</div>
-        <div class="hint" style="font-size: 15.5px; color: #8B959C;">“change lunch, we ate out”</div>
-        <div class="hint" style="font-size: 15.5px; color: #8B959C;">“Krishna's off his food, keep it plain”</div>
-        <div class="hint" style="font-size: 15.5px; color: #8B959C;">“plan me the whole of Sunday”</div>
+    <div style="height: 44px; padding: 0 14px; border-radius: 11px; background: #FFFFFF; border: 1px solid #D3DADD; display: flex; align-items: center; gap: 8px; box-sizing: border-box;">
+      <div style="color: #2F5F7A; display: flex;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l1.9 5.4L19.5 11l-5.6 1.6L12 18l-1.9-5.4L4.5 11l5.6-1.6z"></path><path d="M18.5 16.5l.7 1.9 1.9.7-1.9.7-.7 1.9-.7-1.9-1.9-.7 1.9-.7z"></path></svg>
       </div>
+      <div style="font-size: 14.5px; font-weight: 600;">Inspire</div>
+    </div>
+  </div>
+
+  <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 9px; min-height: 0;">
+
+    <div style="height: 330px; flex-shrink: 0; background: #FFFFFF; border: 1px solid #D3DADD; border-radius: 14px; display: flex; flex-direction: column; overflow: hidden;">
+      <div style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 5px; padding: 14px 18px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.11em; color: #8B959C;">BREAKFAST</div>
+        <div style="font-size: 17px; color: #C4CDD1;">—</div>
+      </div>
+      <div style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 5px; padding: 14px 18px; border-top: 1px solid #D3DADD;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.11em; color: #8B959C;">LUNCH</div>
+        <div style="font-size: 17px; color: #C4CDD1;">—</div>
+      </div>
+      <div style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 5px; padding: 14px 18px; border-top: 1px solid #D3DADD;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.11em; color: #8B959C;">SNACKS</div>
+        <div style="font-size: 17px; color: #C4CDD1;">—</div>
+      </div>
+      <div style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 5px; padding: 14px 18px; border-top: 1px solid #D3DADD;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.11em; color: #8B959C;">DINNER</div>
+        <div style="font-size: 17px; color: #C4CDD1;">—</div>
+      </div>
+    </div>
+
+    <div style="flex-shrink: 0; background: #FFFFFF; border: 1px solid #D3DADD; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.13em; color: #8B959C;">HOW THE DAY READS</div>
+      <div style="font-size: 15.5px; line-height: 1.35; color: #59646C;">No day to read yet. The last three days have been light on protein.</div>
     </div>
 
   </div>
 
-  <div style="display: flex; flex-direction: column; gap: 10px; padding: 0 24px 34px;">
-    <div style="display: flex; align-items: center; gap: 15px; padding: 16px 18px; background: #FFFFFF; border: 1px solid #D3DADD; border-radius: 12px;">
-      <div style="width: 42px; height: 42px; border-radius: 10px; background: #E3EAEE; display: flex; align-items: center; justify-content: center; color: #2F5F7A; flex-shrink: 0;">
-        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l1.9 5.4L19.5 11l-5.6 1.6L12 18l-1.9-5.4L4.5 11l5.6-1.6z"></path><path d="M18.5 16.5l.7 1.9 1.9.7-1.9.7-.7 1.9-.7-1.9-1.9-.7 1.9-.7z"></path></svg>
-      </div>
-      <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1;">
-        <div style="font-size: 16px; font-weight: 600;">Inspire</div>
-        <div style="font-size: 13px; color: #8B959C; line-height: 1.35;">Things you liked, and things you haven't tried</div>
-      </div>
-      <div style="color: #C4CDD1; flex-shrink: 0;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg>
+  <div style="flex-shrink: 0; display: flex; flex-direction: column; gap: 10px;">
+    <div style="position: relative; height: 40px;">
+      <div class="hint" style="position: absolute; top: 0; left: 0; right: 0; font-size: 15px; line-height: 1.35; color: #8B959C;">“what's for dinner?”</div>
+      <div class="hint" style="position: absolute; top: 0; left: 0; right: 0; font-size: 15px; line-height: 1.35; color: #8B959C;">“there's a lot of bhindi lying around”</div>
+      <div class="hint" style="position: absolute; top: 0; left: 0; right: 0; font-size: 15px; line-height: 1.35; color: #8B959C;">“krishna's off his food, keep it plain”</div>
+      <div class="hint" style="position: absolute; top: 0; left: 0; right: 0; font-size: 15px; line-height: 1.35; color: #8B959C;">“plan me the whole of sunday”</div>
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <div style="flex-grow: 1; height: 62px; border-radius: 14px; background: #F3E7D3; border: 1px solid #A96C13; display: flex; align-items: center; gap: 13px; padding: 0 20px; box-sizing: border-box;">
+        <div style="color: #A96C13; display: flex; flex-shrink: 0;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="2" width="6" height="11.5" rx="3"></rect>
+            <path d="M5.2 11a6.8 6.8 0 0 0 13.6 0"></path>
+            <path d="M12 17.8v3.4"></path>
+          </svg>
+        </div>
+        <div style="font-size: 16px; font-weight: 600;">Tap and talk</div>
       </div>
     </div>
   </div>
