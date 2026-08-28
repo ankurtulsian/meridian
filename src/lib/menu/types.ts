@@ -168,7 +168,7 @@ export interface DayPlan {
 // kind of thing — learned, approved, applied to every proposal — so they live
 // together rather than pretending to be separate systems.
 export interface Memory {
-  standingRules: ProposedRule[]
+  standingRules: Rule[]
   profiles: TasteProfile[]
   // Household facts that are neither per-person nor learned: no beef, Tuesdays
   // vegetarian, that sort of thing. Stated once, always on.
@@ -218,17 +218,37 @@ export interface EditEvent {
   at: number
 }
 
-export interface ProposedRule {
+// Rules are not frozen once accepted. Every plan is a quiet test of every active
+// rule: going against one costs it confidence, and a rule you keep overriding
+// comes back to be narrowed or dropped rather than silently continuing to apply.
+export type RuleStatus =
+  | 'proposed'    // waiting on you
+  | 'accepted'    // applied to every proposal
+  | 'challenged'  // recent edits contradict it — needs a decision, not silence
+  | 'narrowed'    // superseded by a tighter version of itself
+  | 'retired'
+  | 'declined'
+
+export interface Rule {
   id: string
   // Stated in the household's own words. A rule you cannot read is a rule you
   // cannot judge, and this one needs judging before it takes effect.
   statement: string
-  // Dimensions that held constant across the supporting edits become the
-  // condition. Everything varying means the preference is global.
+  // Dimensions that held constant across the supporting edits. None of them is a
+  // global claim about every meal; several of them is a micro rule about one slot
+  // with one set of people at the table. Specificity is what sets how much
+  // evidence the rule needs, so this field is not decoration.
   conditions: Partial<EditContext>
   supportingEditIds: string[]
-  status: 'proposed' | 'accepted' | 'declined'
+  // Edits that went against it since it was accepted. This is the field that lets
+  // a rule evolve instead of calcifying.
+  contradictingEditIds: string[]
+  confidence: number
+  status: RuleStatus
+  // Set when a broader rule is replaced by a tighter one rather than dropped.
+  supersedes?: string
   proposedAt: number
+  decidedAt?: number
 }
 
 export interface ValidationFinding {
@@ -257,3 +277,43 @@ export type ConstraintDimension =
   | 'effort'
   | 'variety'
   | 'occasion'
+
+// A source we watch, rather than wait to be shown. New items land in the inbox
+// beside the things you shared by hand.
+//
+// This is a better filter than searching the open web: taste is encoded in the
+// source list itself, so what arrives is already from people you trust. The three
+// kinds are not equally cheap, and the difference is worth knowing before
+// promising any of them —
+//
+//   youtube-channel      free and reliable; every channel publishes RSS keyed by
+//                        channel id, no API key and no scraping
+//   publication          usually paywalled, so it needs the household's own
+//                        login and in practice only exposes hand-saved recipes
+//   instagram-creator    no feed of any kind; needs a paid third-party scraper
+//                        polled per creator, and breaks when Instagram changes
+export interface Source {
+  id: string
+  kind: 'youtube-channel' | 'publication' | 'instagram-creator'
+  name: string
+  feedUrl?: string
+  lastPolledAt?: number
+  active: boolean
+}
+
+export interface InboxItem {
+  id: string
+  // Two lanes: things you pushed in, and things a watched source published.
+  origin: 'shared' | 'source'
+  sourceId?: string
+  url?: string
+  // A note or voice transcript, when there's no link — 'Krishna's been off dairy'.
+  raw?: string
+  // Where triage thinks it belongs. Nothing here takes effect on its own; the
+  // same propose-don't-apply rule that governs rules governs this.
+  proposedDestination?: 'library' | 'pantry' | 'memory'
+  // Expired, not deleted: an inbox that only grows becomes a guilt pile with a
+  // badge you learn to ignore.
+  status: 'new' | 'triaged' | 'accepted' | 'dismissed' | 'expired'
+  addedAt: number
+}
