@@ -72,3 +72,7 @@ in one line before making it.
 | 17 | Rasoi lives in its own folder | 28 Aug | Ankur's call. Keeps it clean of the dormant restaurant app and makes moving it out trivial. |
 | 18 | Rasoi looks like itself, not like Meridian | 28 Aug | The restaurant app's cream-and-serif look belongs to a different product being left behind. |
 | 19 | Repository restructured as a workspace, keeping its name | 28 Aug | Ankur's call: the restaurant app moves to `Meridian_archived/`, the repo stays `meridian` so no paths he uses change. |
+| 20 | The home screen is the day itself, not an empty microphone | 28 Aug | The app is opened at any hour — mid-morning for lunch, evening to change something already decided. An empty screen only suited one of those. |
+| 21 | No status labels on meals | 28 Aug | Ankur: he lives there, he knows whether lunch happened. The system still tracks it for rotation; it just isn't shown. |
+| 22 | "Add" removed | 28 Aug | A recipe, a note, a fridge photo are all just talking. Shared links land in Inspire. Two doors for one act was the mistake. |
+| 23 | "Today" is not a destination | 28 Aug | It is the home screen. |
