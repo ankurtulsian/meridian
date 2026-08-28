@@ -122,7 +122,9 @@ export interface PantryItem {
   lastConfirmedAt: number
 }
 
-export type MealSlot = 'breakfast' | 'lunch' | 'dinner'
+// Snacks included, because a day is planned as a day. Which of these you
+// actually want is part of the ask — planning half a day is normal.
+export type MealSlot = 'breakfast' | 'lunch' | 'snacks' | 'dinner'
 
 export interface MenuItem {
   dishId: string
@@ -135,18 +137,42 @@ export interface MenuItem {
   outcome: 'proposed' | 'sent' | 'cooked' | 'skipped' | 'unknown'
 }
 
-export interface MenuPlan {
+export interface PlannedSlot {
+  slot: MealSlot
+  items: MenuItem[]
+  // A slot can arrive already decided — eaten out, leftovers, or simply settled
+  // without us. It still constrains the rest of the day, which is the whole
+  // reason the day is the unit and the meal is not.
+  source: 'planned' | 'given'
+}
+
+export interface DayPlan {
   id: string
   date: string
-  slot: MealSlot
   version: number
   // Versions are cheap so that reverting is cheap, and people only tweak freely
   // when they know they can go back.
   supersedes?: string
-  items: MenuItem[]
+  // Only the slots that were asked for.
+  slots: PlannedSlot[]
   eating: DinerId[]
+  // Validated across the day rather than per meal: a heavy lunch is only a
+  // problem in combination with a heavy dinner, and daily macro targets are
+  // meaningless against a single sitting.
   validation: ValidationResult
   createdAt: number
+}
+
+// What the system remembers about how this household eats, as distinct from the
+// library of what it can cook. Standing rules and taste profiles are the same
+// kind of thing — learned, approved, applied to every proposal — so they live
+// together rather than pretending to be separate systems.
+export interface Memory {
+  standingRules: ProposedRule[]
+  profiles: TasteProfile[]
+  // Household facts that are neither per-person nor learned: no beef, Tuesdays
+  // vegetarian, that sort of thing. Stated once, always on.
+  globals: string[]
 }
 
 export interface PlateOutcome {
