@@ -11,9 +11,10 @@ move, not reconstructed at the end. Protocol: `.claude/working-style.md`.
 
 **T2 — Multi-project setup standard**
 *Exit criterion:* Ankur can start a new project and have the working style, a fresh
-notebook, and the check-in skill in place without reconstructing them by hand. Includes
-deciding where the universal working style lives versus what stays per-project.
-*Status:* scoping. Recommendation given; awaiting Ankur's direction.
+notebook, and the check-in skill in place without reconstructing them by hand.
+*Status:* solved for now. One-time script written and tested. New projects need only a
+notebook, generated on request. No reusable starter until 3-4 projects exist — building
+one now would be guessing at the shape.
 
 ---
 
@@ -29,14 +30,12 @@ deciding where the universal working style lives versus what stays per-project.
 
 ## Blocked on Ankur
 
-1. **Install the working style at user level on his own machine.** Cannot be done from a
-   remote session — this container is wiped when the session ends. Until then the protocol
-   applies to Meridian only.
-2. **T2 direction** — is a reusable project-starter worth building, or is copying the two
-   files into each new project good enough?
-3. **P1** — build the session-start hook, or leave rehydration to the `CLAUDE.md` import?
-4. **Redline `.claude/working-style.md`** — specifically the check-in trigger thresholds
-   and the scope exception. Both are guesses awaiting real use.
+1. **Run `bash .claude/apply-everywhere.sh` once, on his own computer.** Makes the working
+   style and `/check-in` apply to every project rather than Meridian alone. Cannot be done
+   from a remote session — this container is wiped when the session ends. Safe to re-run.
+2. **Redline `.claude/working-style.md`** — the check-in trigger thresholds and the scope
+   exception are guesses awaiting real use. Not urgent.
+3. **P1** — session-start hook. Low priority; the current mechanism works.
 
 ## Blocked on others
 
@@ -59,3 +58,5 @@ Closed items. Recorded so they are not relitigated.
 | D7 | One notebook per project; working style is universal | 2026-08-28 | Parallel projects must not bleed together, but the protocol should not be re-established per project |
 | D8 | Default to executive-summary register, not technical phrasing | 2026-08-28 | Ankur is a business professional with no PM translating |
 | D9 | `/check-in` skill approved as written | 2026-08-28 | Ankur confirmed |
+| D10 | No project-starter tooling until 3-4 projects exist | 2026-08-28 | Shape is unknown; a new project needs only a notebook, which is seconds of work |
+| D11 | Questions must be free of Claude-coined jargon and must not re-ask settled intent | 2026-08-28 | Claude asked Ankur to choose between two invented labels; one was already decided |
