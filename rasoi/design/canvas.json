@@ -1,9 +1,37 @@
 {
   "artboards": [
-    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 390, "h": 844, "title": "The day — moment 1 of 3 · opened at 4pm, dinner still open" },
-    { "file": "Conversation.dc.html", "x": 490, "y": 0, "w": 390, "h": 844, "title": "The day — moment 2 of 3 · the plan forming as they talk" },
-    { "file": "Agreeing.dc.html", "x": 980, "y": 0, "w": 390, "h": 844, "title": "The day — moment 3 of 3 · it asks whether to send" },
-    { "file": "Review.dc.html", "x": 1470, "y": 0, "w": 390, "h": 844, "title": "The kitchen card — a sheet off the day, in Hindi" }
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "The day — moment 1 of 3 · opened at 4pm, dinner still open"
+    },
+    {
+      "file": "Conversation.dc.html",
+      "x": 490,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "The day — moment 2 of 3 · the plan forming as they talk"
+    },
+    {
+      "file": "Agreeing.dc.html",
+      "x": 980,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "The day — moment 3 of 3 · it asks whether to send"
+    },
+    {
+      "file": "Review.dc.html",
+      "x": 1470,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "The kitchen card — a sheet off the day, in Hindi"
+    }
   ],
   "annotations": [
     {
@@ -11,14 +39,14 @@
       "x": 0,
       "y": -150,
       "w": 1370,
-      "text": "Moments 1-3 are ONE screen at three points in the same Thursday afternoon, not three screens. The wordmark, the day card, the one-line remark and the talk bar hold their positions throughout; only what sits inside them changes. There is no navigation anywhere in the app: if it can be spoken, it is not a destination."
+      "text": "Moments 1-3 are ONE screen at three points in the same Thursday afternoon, not three screens. What is fixed is the ORDER — wordmark, date, day card, the one-line remark, the talk bar — not the heights: the day card grows and shrinks with what is in it, so an undecided dinner is a one-line row and a decided one opens into two menus. There is no navigation anywhere in the app: if it can be spoken, it is not a destination."
     },
     {
       "id": "pinned-plan",
       "x": 490,
       "y": 900,
       "w": 380,
-      "text": "The day never scrolls. The talk scrolls underneath it, so the menu he is building stays in front of him while he speaks. The steel-tinted line (Curd) is what his last exchange added — it fades after a few seconds. Two menus side by side, with the shared khichdi banded in amber so the cook can see it is one pot, not two."
+      "text": "The day never scrolls. The talk scrolls underneath it, so the menu he is building stays in front of him while he speaks. The two columns carry the information structurally: a dish that is the same for everyone spans the full width (curd, papad), a dish that differs splits into two (khichdi, banded in amber — one pot, Krishna's portion out before the mirchi). The steel-tinted row is what his last exchange added; it fades."
     },
     {
       "id": "agreement",
@@ -35,5 +63,7 @@
       "text": "The only thing that leaves the conversation, and so the only thing that earns a screen of its own: a different reader, a different language. Two outputs — the menu as a card, and the same menu written out as prose for whoever is cooking it. It exists only once he has agreed."
     }
   ],
-  "launch": { "view": "canvas" }
+  "launch": {
+    "view": "canvas"
+  }
 }
