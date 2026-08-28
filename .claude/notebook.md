@@ -24,6 +24,7 @@ back in the canvas. Nothing else starts until this closes or Ankur redirects.
 | 4 | Inspire section | 28 Aug | Designed, not built | Ankur said "maybe". It's a view over data already stored, so it stays cheap either way. |
 | 5 | Recipe ingestion (YouTube, NYT, Instagram) | 28 Aug | Next after screens | Deliberately after, so a recipe record's shape is settled before building the thing that fills it. |
 | 6 | Database | 28 Aug | Next | Postgres from day one. History is the asset — losing it resets everything the system has learned. |
+| 7 | Integrations and services mapped | 28 Aug | Answered inline | Under $25/mo all-in, nearly all of it Claude. Offered to fold into the schema page; Ankur has not said either way. |
 
 ## Blocked on Ankur
 
@@ -32,6 +33,7 @@ back in the canvas. Nothing else starts until this closes or Ankur redirects.
 | 1 | Which channels, creators and publications to follow | This list *is* the taste filter. Nothing sensible gets suggested without it. |
 | 2 | What Krishna genuinely won't eat, and any allergies | The only hard rules in the system. Everything else is a preference that bends. |
 | 3 | Whether the cook gets his own screen | Changes nothing upstream; only decides where the Hindi card is delivered. |
+| 4 | Twenty recorded sentences from him and Shruti, said naturally | The one genuinely uncertain piece. Speech recognition on mixed Hindi-English is the only part nobody can promise in advance; twenty real samples settle which service to use. |
 
 ## Blocked on others
 
@@ -76,3 +78,11 @@ in one line before making it.
 | 21 | No status labels on meals | 28 Aug | Ankur: he lives there, he knows whether lunch happened. The system still tracks it for rotation; it just isn't shown. |
 | 22 | "Add" removed | 28 Aug | A recipe, a note, a fridge photo are all just talking. Shared links land in Inspire. Two doors for one act was the mistake. |
 | 23 | "Today" is not a destination | 28 Aug | It is the home screen. |
+| 24 | Inspire is spoken, not a screen | 28 Aug | "Inspire me" is something you say. Third instance of the same error, so the rule is now explicit: if it can be spoken, it is not a screen. |
+| 25 | Voice is two-way; agreement is spoken | 28 Aug | The system asks questions and pushes back. Nothing is settled until Ankur says so out loud, prompted by it asking whether to send. |
+| 26 | Macros collapse to one sentence | 28 Aug | The table was far too much apparatus. Reasoning is available by asking, not displayed. |
+| 27 | Two menus in the output | 28 Aug | Krishna gets a menu of his own, highlighted as the same khichdi — so the cook sees one pot, not two. |
+| 28 | A review screen before sending | 28 Aug | The card and a narrative, seen in full before it reaches a person who will act on it. |
+| 29 | The plan stays visible while talking | 28 Aug | Ankur: otherwise he will not remember everything. Rules out a conventional chat layout. |
+| 30 | Prompt caching is structural, not an optimisation | 28 Aug | It is the difference between roughly $45 a month and a few dollars, because every turn resends the history and the dish library. |
+| 31 | YouTube first; Instagram and NYT best-effort | 28 Aug | YouTube publishes free channel feeds. Instagram has no legal API, and NYT Cooking is paywalled with no export. |
