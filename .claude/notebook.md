@@ -54,11 +54,11 @@ does the copying unprompted on the first session in any project lacking a notebo
 
 ## Blocked on Ankur
 
-1. **Open this branch for review, or leave it as a branch?** Asked early in the session,
-   never answered, and Claude carried on without it. Seven commits are pushed either way.
-2. **Calibrate the placeholders** in `.claude/working-style.md` — the four-open-items
+1. **Calibrate the placeholders** in `.claude/working-style.md` — the four-open-items
    check-in trigger, and "unless it would be ridiculous". Needs real sessions first.
-3. **P1** — session-start hook. Low priority; the current mechanism works.
+2. **P1** — session-start hook. Low priority; the current mechanism works.
+
+*Nothing here is urgent.*
 
 ## Blocked on others
 
@@ -91,3 +91,5 @@ Closed items. Recorded so they are not relitigated.
 | D17 | Agents own depth; briefing and checking stay with Claude | 2026-08-28 | Ankur: "an agent has to become the expert on the thread — who else would be." Claude's original rule left deep work with no owner |
 | D18 | Pile B principles 1, 2, 4, 5 stand as written | 2026-08-28 | Reviewed; Ankur differed only on 3 |
 | D19 | Protocol uploaded to Ankur's claude.ai account as a skill | 2026-08-28 | Closes the one gap the per-project files could not: a project Claude has never seen |
+| D20 | Ankur's account is the master copy of the protocol; no project holds it for the others | 2026-08-28 | Ankur: Meridian is not to become the main folder. It is a restaurant app, not a config store. `.claude/portable/` removed; the skill can be regenerated from the account copy or any project's own copy |
+| D21 | Today's work folded into Meridian's main version | 2026-08-28 | The notebook exists nowhere else; without merging, the next session on main would have the rules but none of the history |
