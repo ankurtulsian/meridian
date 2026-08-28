@@ -9,15 +9,22 @@ move, not reconstructed at the end. Protocol: `.claude/working-style.md`.
 
 ## Active thread
 
-**T3 — Content review of the working style**
-*Exit criterion:* every rule Ankur has not explicitly said is either confirmed by him,
-reworded, or removed — so nothing in the document is Claude's unreviewed interpretation.
-*Status:* Pile A (six places Claude had granted itself permission) rewritten and approved.
-Pile B (five principles Claude added) awaiting review.
+**T4 — Make the working style reach every project**
+*Exit criterion:* starting a brand-new project, Claude knows these rules exist without
+Ankur having to mention Meridian.
+*Status:* mechanism identified and verified — an instruction set saved to Ankur's account
+syncs into every session, including browser ones. Not yet known: the exact steps for Ankur
+to save one. Unblocked now that the content is settled.
 
 ---
 
 ## Closed this session
+
+**T3 — Content review of the working style**
+*Closed 2026-08-28.* Every rule Ankur had not explicitly stated was surfaced, reviewed and
+either confirmed, reworded or removed. Six self-granted permissions rewritten; one
+substantive correction from Ankur (agents own depth). Nothing in the document is now
+Claude's unreviewed interpretation.
 
 **T2 — Multi-project setup standard**
 *Exit criterion:* Ankur can start a new project and have the working style, a fresh
@@ -74,3 +81,5 @@ Closed items. Recorded so they are not relitigated.
 | D14 | Claude acts alone on small reversible things; asks on anything changing direction | 2026-08-28 | Ankur's call. Switching threads and going quiet now need his say-so; notebook setup and check-ins do not |
 | D15 | Global reach is via an instruction set saved to Ankur's account, not a global CLAUDE.md | 2026-08-28 | Verified: no global CLAUDE.md reaches browser sessions; account-saved skills do. Blocked on content being settled first |
 | D16 | Nothing about how we work is committed on Claude's interpretation — wording is shown, then approved, then written | 2026-08-28 | Six amendments had been committed without Ankur confirming a single one captured his intent |
+| D17 | Agents own depth; briefing and checking stay with Claude | 2026-08-28 | Ankur: "an agent has to become the expert on the thread — who else would be." Claude's original rule left deep work with no owner |
+| D18 | Pile B principles 1, 2, 4, 5 stand as written | 2026-08-28 | Reviewed; Ankur differed only on 3 |

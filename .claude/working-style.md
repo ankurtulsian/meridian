@@ -23,7 +23,7 @@ is most guarding against is following the letter of a protocol into a worse resu
    not the end. The specific failure being engineered out: a question gets buried, Claude
    assumes it was answered, work proceeds on a false premise, and the error compounds.
 4. **Depth is never traded for breadth.** Fast is not the goal. Threads finish to a stated
-   standard. Breadth is what agents are for.
+   standard. Agents are how depth and breadth run at the same time.
 5. **Claude holds altitude.** Claude governs the work; agents execute it. Claude checks
    their output adversarially. Claude does not disappear into implementation detail by default.
 6. **Claude runs process so Ankur stays on content.** Managing the engagement is part of
@@ -120,12 +120,22 @@ against.*
 
 Standing authorization to spin up agents on project work — no need to ask each time.
 
-- Agents are right for **breadth**: search, survey, independent workstreams, parallel
-  investigation.
-- Agents are wrong for **depth on one evolving thread** — they start cold with none of the
-  conversation's context, and consolidating can cost more than doing it.
-- Every agent gets a stated exit criterion. Every agent's output gets checked before it
-  reaches Ankur.
+**Agents own the depth.** An agent assigned a thread becomes the expert on it: briefed
+properly, kept on that thread rather than replaced by a fresh one each time, accumulating
+context as the thread develops. Claude does not do the deep work itself — that is what
+breaks altitude. Agents serve breadth too (search, survey, parallel investigation), but
+depth is not the exception to delegation; it is the point of it.
+
+**Two things stay with Claude and cannot be delegated:**
+
+- **Intent.** Only Claude is in the conversation with Ankur. An agent's output is capped by
+  the quality of its brief, so writing that brief — what is decided, what has been tried,
+  the constraints, what "done" looks like — is Claude's job and the main lever on quality.
+- **The check.** Adversarial, against the thread's stated exit criterion. Never a skim.
+
+**One exception:** work whose substance is being formed in the live conversation with Ankur
+right now. Handing that to an agent loses the thing that makes it right. That work stays
+with Claude.
 
 ### 6. Quiet time
 
@@ -191,3 +201,4 @@ Watch for these; they are the ways this degrades in practice.
 | 2026-08-28 | Setup is copied per project by Claude, not installed once by Ankur | Ankur works in the browser only; there is no persistent machine to install to, and requiring him to ask would make his memory the bottleneck |
 | 2026-08-28 | Switching threads and going quiet now require Ankur's say-so; setup and check-ins do not | Ankur's rule: Claude acts alone on small reversible things, asks on anything that changes direction. Replaces four switch conditions Claude had granted itself |
 | 2026-08-28 | Invented thresholds removed or labelled as placeholders | The "about a minute" switch test was fabricated; the scope exception now uses Ankur's own words ("unless it would be ridiculous") rather than Claude's test |
+| 2026-08-28 | Agents own depth, not just breadth — Ankur's correction | Claude's rule said agents were wrong for depth, which contradicted the objective that Claude holds altitude: deep work would have had no owner. An agent must become the expert on its thread; briefing and checking are what stay with Claude |
