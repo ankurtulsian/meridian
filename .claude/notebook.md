@@ -56,3 +56,4 @@ None.
 | 16 | Skip CI, logins, monitoring, component libraries, most tests | 28 Aug | Three people and a cook don't earn it. |
 | 17 | Rasoi lives in its own folder | 28 Aug | Ankur's call. Keeps it clean of the dormant restaurant app and makes moving it out trivial. |
 | 18 | Rasoi looks like itself, not like Meridian | 28 Aug | The restaurant app's cream-and-serif look belongs to a different product being left behind. |
+| 19 | Repository restructured as a workspace, keeping its name | 28 Aug | Ankur's call: the restaurant app moves to `Meridian_archived/`, the repo stays `meridian` so no paths he uses change. |

@@ -1,7 +1,8 @@
-# Meridian
+# Workspace
 
-This repository currently holds two unrelated things. They share a Next.js app and nothing
-else.
+The repository is still named `meridian` so existing paths keep working, but it is a
+container for separate pieces of work, not a single app. Active work is `rasoi/`; the
+restaurant concierge sits finished in `Meridian_archived/` and shares nothing with it.
 
 ## Rasoi — daily menu planning (active work)
 
@@ -30,10 +31,10 @@ mocking anything.
 Two principles run through it: the system never claims to know more than it does, and it
 proposes rather than silently applying.
 
-## Meridian — Dubai restaurant concierge (dormant)
+## Meridian_archived — Dubai restaurant concierge
 
-`src/` is an earlier, unrelated project.
-Not under active development.
+A finished, earlier project. Not under development, and nothing in `rasoi/` depends on it.
+Its Next.js app, dependencies and config all live inside that folder.
 
 ## How we work
 
