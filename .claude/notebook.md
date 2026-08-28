@@ -1,0 +1,57 @@
+# Notebook — Rasoi (menu planning)
+
+Live engagement record **for this project only**. Read at session start. Updated as threads
+move, not reconstructed at the end.
+
+**Last updated:** 2026-08-28
+
+## Active thread
+
+**Design the screens.** Ankur asked for the visual before any more code. Exit criterion: a
+mockup of the one main screen in every state it passes through — empty, after speaking,
+mid-conversation, and the card that goes to the kitchen — good enough that he and Shruti can
+argue with it rather than imagine it.
+
+## Parking lot
+
+| # | Thread | Raised | Disposition | Note |
+|---|---|---|---|---|
+| 1 | Separate repo for Rasoi vs staying in Meridian | 28 Aug | Parked | Menu code imports nothing from the restaurant app, so moving is a copy. No urgency. |
+| 2 | A screen for the cook | 28 Aug | Blocked on Ankur | Undecided. Kept cheap: the Hindi card is generated from the plan, so a kitchen page, a WhatsApp send, or nothing are all swaps at the end. |
+| 3 | WhatsApp automation | 28 Aug | Parked | Needs a spare SIM and Meta verification. Copy-and-forward does the same job today. |
+| 4 | Inspire section | 28 Aug | Designed, not built | Ankur said "maybe". It's a view over data already stored, so it stays cheap either way. |
+| 5 | Recipe ingestion (YouTube, NYT, Instagram) | 28 Aug | Next after screens | Deliberately after, so a recipe record's shape is settled before building the thing that fills it. |
+| 6 | Database | 28 Aug | Next | Postgres from day one. History is the asset — losing it resets everything the system has learned. |
+
+## Blocked on Ankur
+
+| # | Needed | Why it matters |
+|---|---|---|
+| 1 | Which channels, creators and publications to follow | This list *is* the taste filter. Nothing sensible gets suggested without it. |
+| 2 | What Krishna genuinely won't eat, and any allergies | The only hard rules in the system. Everything else is a preference that bends. |
+| 3 | Whether the cook gets his own screen | Changes nothing upstream; only decides where the Hindi card is delivered. |
+
+## Blocked on others
+
+None.
+
+## Decisions log
+
+| # | Decision | Date | Rationale |
+|---|---|---|---|
+| 1 | Ingredients are a preference, not a requirement | 28 Aug | You can always buy something. Means the app always returns a menu instead of refusing when constraints clash. |
+| 2 | A day is planned at once, not a meal at a time | 28 Aug | Lunch decides dinner. Balance and nutrition only mean anything across a whole day. |
+| 3 | Ask for any part of a day; meals settled elsewhere still count | 28 Aug | A lunch eaten out isn't a gap — it still makes dinner lighter. |
+| 4 | The app opens on a microphone, with nothing pre-planned | 28 Aug | Ankur: there's nothing to propose before he's said anything. |
+| 5 | A suggestion made before he speaks can only use history | 28 Aug | The fridge is only known when recently mentioned, and it goes stale in days. |
+| 6 | Macros shown as lighter/ordinary/heavier, never numbers | 28 Aug | Estimates are ±20%. A number pretends to a precision that isn't there; a direction is honest and is what he'd act on. |
+| 7 | Bands compare against the household's own recent average | 28 Aug | Nothing to configure, and the comparison survives rough numbers. |
+| 8 | Learned habits surface on evidence, not on a schedule | 28 Aug | Ankur: depends what kind of rule. Narrow habits settle in days, sweeping ones take weeks. |
+| 9 | Accepted habits can be challenged, narrowed or dropped | 28 Aug | Ankur: all rules evolve. Overriding one repeatedly brings it back for a decision. |
+| 10 | Standing rules, taste profiles and household rules are one thing | 28 Aug | They were three names for the same memory. |
+| 11 | The fridge is only ever what Ankur says it is | 28 Aug | No grocery list feeds it, nothing infers it. |
+| 12 | Recipes come from sources they already follow, not web search | 28 Aug | Taste sits in the source list itself, so what arrives is pre-filtered. |
+| 13 | Nothing shared or learned takes effect without a tap | 28 Aug | The system proposes; it never changes behaviour quietly. |
+| 14 | Screens before plumbing | 28 Aug | The screen decides what the machinery has to produce. |
+| 15 | Real database from the start; keep the rules code independent | 28 Aug | History is the asset. Independence lets the screen or the model change without touching the rules. |
+| 16 | Skip CI, logins, monitoring, component libraries, most tests | 28 Aug | Three people and a cook don't earn it. |
