@@ -27,3 +27,7 @@ yarn-error.log*
 # os
 .DS_Store
 *.pem
+
+# generated design output — rebuild from the .dc.html artboards, see rasoi/design/README.md
+rasoi/design/rasoi-screens.html
+rasoi/design/rasoi-screens-preview.html
