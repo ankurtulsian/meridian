@@ -12,9 +12,11 @@ move, not reconstructed at the end. Protocol: `.claude/working-style.md`.
 **T4 — Make the working style reach every project**
 *Exit criterion:* starting a brand-new project, Claude knows these rules exist without
 Ankur having to mention Meridian.
-*Status:* mechanism identified and verified — an instruction set saved to Ankur's account
-syncs into every session, including browser ones. Not yet known: the exact steps for Ankur
-to save one. Unblocked now that the content is settled.
+*Status:* answered. Skills enabled on a claude.ai account sync into every cloud session at
+session start; a global `CLAUDE.md` does not reach them at all. The protocol is packaged as
+an uploadable skill at `.claude/portable/working-style.zip`. Remaining: Ankur uploads it.
+Exact menu labels are from search summaries — Anthropic's support site is blocked by this
+container's network, so they are unverified at first hand.
 
 ---
 
@@ -47,9 +49,12 @@ does the copying unprompted on the first session in any project lacking a notebo
 
 ## Blocked on Ankur
 
-1. **Redline `.claude/working-style.md`** — the check-in trigger thresholds and the scope
-   exception are guesses awaiting real use. Not urgent.
-2. **P1** — session-start hook. Low priority; the current mechanism works.
+1. **Upload `.claude/portable/working-style.zip`** on claude.ai — Customize → Skills → +
+   → Create skill → upload → toggle on. Requires Settings → Capabilities → "Code execution
+   and file creation" to be on. This is what makes the protocol reach every project.
+2. **Calibrate the placeholders** in `.claude/working-style.md` — the four-open-items
+   check-in trigger, and "unless it would be ridiculous". Both need real sessions first.
+3. **P1** — session-start hook. Low priority; the current mechanism works.
 
 *Nothing here is urgent and nothing blocks progress.*
 
