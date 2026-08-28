@@ -1,14 +1,39 @@
 {
   "artboards": [
-    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 390, "h": 844, "title": "1 · Open" },
-    { "file": "Proposed.dc.html", "x": 490, "y": 0, "w": 390, "h": 844, "title": "2 · It answers" },
-    { "file": "Sparring.dc.html", "x": 980, "y": 0, "w": 390, "h": 844, "title": "3 · You push back" },
-    { "file": "Handover.dc.html", "x": 1470, "y": 0, "w": 390, "h": 844, "title": "4 · To the kitchen" },
-    { "file": "Inspire.dc.html", "x": 0, "y": 1000, "w": 390, "h": 844, "title": "Inspire" }
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 390, "h": 844, "title": "The day — moment 1 of 3 · opened at 4pm, dinner still open" },
+    { "file": "Conversation.dc.html", "x": 490, "y": 0, "w": 390, "h": 844, "title": "The day — moment 2 of 3 · the plan forming as they talk" },
+    { "file": "Agreeing.dc.html", "x": 980, "y": 0, "w": 390, "h": 844, "title": "The day — moment 3 of 3 · it asks whether to send" },
+    { "file": "Review.dc.html", "x": 1470, "y": 0, "w": 390, "h": 844, "title": "The kitchen card — a sheet off the day, in Hindi" }
   ],
   "annotations": [
-    { "id": "flow-note", "x": 0, "y": -130, "w": 700, "text": "The day is the home screen. The mic changes any part of it — including something decided hours ago." },
-    { "id": "side-note", "x": 0, "y": 870, "w": 700, "text": "The one side door. Anything shared from Instagram or YouTube lands here." }
+    {
+      "id": "one-screen",
+      "x": 0,
+      "y": -150,
+      "w": 1370,
+      "text": "Moments 1-3 are ONE screen at three points in the same Thursday afternoon, not three screens. The wordmark, the day card, the one-line remark and the talk bar hold their positions throughout; only what sits inside them changes. There is no navigation anywhere in the app: if it can be spoken, it is not a destination."
+    },
+    {
+      "id": "pinned-plan",
+      "x": 490,
+      "y": 900,
+      "w": 380,
+      "text": "The day never scrolls. The talk scrolls underneath it, so the menu he is building stays in front of him while he speaks. The steel-tinted line (Curd) is what his last exchange added — it fades after a few seconds. Two menus side by side, with the shared khichdi banded in amber so the cook can see it is one pot, not two."
+    },
+    {
+      "id": "agreement",
+      "x": 980,
+      "y": 900,
+      "w": 380,
+      "text": "Nothing is settled until he says so out loud, and the system asks for that agreement explicitly, so a loose \"that's fine\" cannot be mistaken for it. The plan card's border turns steel once it has converged and stopped changing. No send button lives here — it is on the sheet, after he says yes."
+    },
+    {
+      "id": "sheet",
+      "x": 1470,
+      "y": 900,
+      "w": 380,
+      "text": "The only thing that leaves the conversation, and so the only thing that earns a screen of its own: a different reader, a different language. Two outputs — the menu as a card, and the same menu written out as prose for whoever is cooking it. It exists only once he has agreed."
+    }
   ],
   "launch": { "view": "canvas" }
 }
