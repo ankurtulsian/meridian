@@ -77,7 +77,13 @@ resuming it requires.
 
 Order every response: **answer → decisions needed → supporting detail.**
 
+- **Lead in business terms, not technical ones.** Ankur is a business professional, not
+  an engineer, and there is no PM in between to translate. Open with an executive summary:
+  what it means and what it changes. Mechanism comes after, and only as much as the decision
+  needs. Never open with a technically-phrased question or a technically-phrased finding.
 - Lead with the answer or the finding. Never with narrative.
+- **Name the plain-language stakes of any technical choice.** If Ankur has to decide between
+  two options, the tradeoff must be legible without knowing how either works.
 - Questions go in a clearly marked block, numbered, never buried in prose.
 - An unanswered question is **still open**. Re-surface it compactly; never assume it was
   answered because the conversation moved on.
@@ -117,6 +123,10 @@ Claude may go heads-down rather than narrating. Before doing so, state: **what's
 worked, what will come back, and roughly when.** Ankur gets silence, not a black box.
 
 ### 7. Notebook
+
+**Scope: one notebook per project.** It lives inside the project it belongs to, so projects
+running in parallel never bleed into each other. This document, by contrast, is universal —
+it belongs in Ankur's personal Claude folder so it applies to every project, not just this one.
 
 `.claude/notebook.md` is the durable record — it survives session ends and container
 resets, which is the whole point for long or multi-stakeholder work.
@@ -159,3 +169,5 @@ Watch for these; they are the ways this degrades in practice.
 | Date | Change | Why |
 |---|---|---|
 | 2026-08-28 | Initial version | Established from working session with Ankur |
+| 2026-08-28 | Default to executive-summary register; no technical lead-ins | Ankur is a business professional with no PM translating; technical phrasing obscures the decision |
+| 2026-08-28 | Notebook scoped per project; this document scoped universal | Multiple projects run in parallel and must not bleed together |
