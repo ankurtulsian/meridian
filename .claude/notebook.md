@@ -12,9 +12,9 @@ move, not reconstructed at the end. Protocol: `.claude/working-style.md`.
 **T2 — Multi-project setup standard**
 *Exit criterion:* Ankur can start a new project and have the working style, a fresh
 notebook, and the check-in skill in place without reconstructing them by hand.
-*Status:* solved for now. One-time script written and tested. New projects need only a
-notebook, generated on request. No reusable starter until 3-4 projects exist — building
-one now would be guessing at the shape.
+*Status:* closed. Ankur works in the browser only, so there is no one-time install — each
+project gets its own copy of the working style, notebook, and check-in skill, and Claude
+does the copying unprompted on the first session in any project lacking a notebook.
 
 ---
 
@@ -30,12 +30,11 @@ one now would be guessing at the shape.
 
 ## Blocked on Ankur
 
-1. **Run `bash .claude/apply-everywhere.sh` once, on his own computer.** Makes the working
-   style and `/check-in` apply to every project rather than Meridian alone. Cannot be done
-   from a remote session — this container is wiped when the session ends. Safe to re-run.
-2. **Redline `.claude/working-style.md`** — the check-in trigger thresholds and the scope
+1. **Redline `.claude/working-style.md`** — the check-in trigger thresholds and the scope
    exception are guesses awaiting real use. Not urgent.
-3. **P1** — session-start hook. Low priority; the current mechanism works.
+2. **P1** — session-start hook. Low priority; the current mechanism works.
+
+*Nothing here is urgent and nothing blocks progress.*
 
 ## Blocked on others
 
@@ -60,3 +59,5 @@ Closed items. Recorded so they are not relitigated.
 | D9 | `/check-in` skill approved as written | 2026-08-28 | Ankur confirmed |
 | D10 | No project-starter tooling until 3-4 projects exist | 2026-08-28 | Shape is unknown; a new project needs only a notebook, which is seconds of work |
 | D11 | Questions must be free of Claude-coined jargon and must not re-ask settled intent | 2026-08-28 | Claude asked Ankur to choose between two invented labels; one was already decided |
+| D12 | Ankur uses Claude in the browser/app only | 2026-08-28 | Confirmed directly; invalidates any setup step requiring a local machine |
+| D13 | Claude copies the setup into each new project unprompted; D10 superseded | 2026-08-28 | No shared machine exists to install to, and asking Ankur to request it would make his memory the bottleneck |

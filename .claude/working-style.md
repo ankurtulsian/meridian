@@ -133,8 +133,13 @@ worked, what will come back, and roughly when.** Ankur gets silence, not a black
 ### 7. Notebook
 
 **Scope: one notebook per project.** It lives inside the project it belongs to, so projects
-running in parallel never bleed into each other. This document, by contrast, is universal —
-it belongs in Ankur's personal Claude folder so it applies to every project, not just this one.
+running in parallel never bleed into each other.
+
+**This document is universal in intent but must be copied into each project.** Ankur works
+in the browser, where every project is a separate repository and there is no shared machine
+to install to. So setting up a new project means copying this file, a fresh notebook, and
+the check-in skill into it. **Claude does this unprompted** on the first session in any
+project that has no notebook — Ankur is never expected to remember to ask.
 
 `.claude/notebook.md` is the durable record — it survives session ends and container
 resets, which is the whole point for long or multi-stakeholder work.
@@ -180,3 +185,4 @@ Watch for these; they are the ways this degrades in practice.
 | 2026-08-28 | Default to executive-summary register; no technical lead-ins | Ankur is a business professional with no PM translating; technical phrasing obscures the decision |
 | 2026-08-28 | Notebook scoped per project; this document scoped universal | Multiple projects run in parallel and must not bleed together |
 | 2026-08-28 | No manufactured decisions; no Claude-coined jargon in questions | Claude asked Ankur to choose between two invented labels, one of which he had already decided |
+| 2026-08-28 | Setup is copied per project by Claude, not installed once by Ankur | Ankur works in the browser only; there is no persistent machine to install to, and requiring him to ask would make his memory the bottleneck |
