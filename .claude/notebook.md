@@ -12,8 +12,10 @@ move, not reconstructed at the end. Protocol: `.claude/working-style.md`.
 **T5 — Confirm the uploaded skill actually fires**
 *Exit criterion:* a fresh session, in a project with none of these files, loads the protocol
 on its own and creates a notebook without Ankur mentioning Meridian.
-*Status:* untested and untestable from here. Account skills sync at session *start*, so this
-session cannot see the upload. First real test is the next new session.
+*Status:* half verified. The skill synced into *this* session — Claude read it back from the
+account folder and the content is intact, including Ankur's agents-own-depth correction. So
+upload, sync and content are confirmed. Still untested: whether it fires *on its own* in a
+project with no notebook. Here it was invoked by hand, which proves presence, not triggering.
 
 ---
 
