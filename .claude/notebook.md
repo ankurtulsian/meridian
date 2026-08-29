@@ -7,10 +7,14 @@ move, not reconstructed at the end.
 
 ## Active thread
 
-**Screens — awaiting Ankur and Shruti's reaction.** Six phone screens published as an
-editable canvas: every state of the main screen, plus Inspire and Add. Drafted as static
-mockups, not clickable. Exit criterion: they have reacted and the changes they want are
-back in the canvas. Nothing else starts until this closes or Ankur redirects.
+**The thin slice — building.** The first version that actually runs: talk, get a day back,
+argue with it, agree, see the Hindi card. Exit criterion: `npm run dev` starts and that
+whole path can be walked without a key, with correct Devanagari and no console errors.
+Delegated; Claude checks by running it, not by reading the report.
+
+Deliberate deviation, owned by Claude: no database yet. State goes to a JSON file behind a
+narrow interface. At slice stage there is no history worth keeping and a database would put
+a signup in front of the first run. Swapping it in later touches one file.
 
 ## Parking lot
 
@@ -23,7 +27,8 @@ back in the canvas. Nothing else starts until this closes or Ankur redirects.
 | 3 | WhatsApp automation | 28 Aug | Parked | Needs a spare SIM and Meta verification. Copy-and-forward does the same job today. |
 | 4 | Inspire section | 28 Aug | Designed, not built | Ankur said "maybe". It's a view over data already stored, so it stays cheap either way. |
 | 5 | Recipe ingestion (YouTube, NYT, Instagram) | 28 Aug | Next after screens | Deliberately after, so a recipe record's shape is settled before building the thing that fills it. |
-| 6 | Database | 28 Aug | Next | Postgres from day one. History is the asset — losing it resets everything the system has learned. |
+| 6 | Database | 28 Aug | Deferred past the slice | Still Postgres, still because history is the asset. Held behind a one-file interface until there is history worth keeping. |
+| 10 | Screens — Ankur and Shruti's reaction | 28 Aug | Open | Four artboards reviewed and rendered. No reaction yet from either of them; the slice is being built against them meanwhile. |
 | 7 | Integrations and services mapped | 28 Aug | Answered inline | Under $25/mo all-in, nearly all of it Claude. Offered to fold into the schema page; Ankur has not said either way. |
 | 8 | Should a menu follow a structure — a carb, something wet, something green | 28 Aug | Parked by Ankur | His words: figure out later. Nothing built for it; the generator stays unstructured until he says otherwise. |
 | 9 | What Krishna actually eats at dinner | 28 Aug | Closed — not a question | His food varies like anyone's. Learned through use and decaying signals, never configured. Mockup placeholders stand until there is an app to fill them. |
@@ -94,6 +99,8 @@ in one line before making it.
 | 29 | The plan stays visible while talking | 28 Aug | Ankur: otherwise he will not remember everything. Rules out a conventional chat layout. |
 | 30 | The system knows about food, not just about them | 28 Aug | Rice needs something wet beside it. Held as associations, learned or stated, and a breach prompts rather than blocks. |
 | 31 | The home screen opens with a broad question | 28 Aug | Planning starts from a constraint he already has. Asking is not proposing, so nothing is pre-planned. |
+| 32 | Code ranks and checks; the model converses and writes | 28 Aug | Handing the library to the model and asking for a menu makes it do rotation arithmetic badly and drift. This split is why the rules code is pure. |
+| 33 | Prompt caching is structural, not an optimisation | 28 Aug | It is the difference between roughly $45 a month and a few dollars, because every turn resends the history and the dish library. |
 | 24 | Inspire is spoken, not a screen | 28 Aug | "Inspire me" is something you say. Third instance of the same error, so the rule is now explicit: if it can be spoken, it is not a screen. |
 | 25 | Voice is two-way; agreement is spoken | 28 Aug | The system asks questions and pushes back. Nothing is settled until Ankur says so out loud, prompted by it asking whether to send. |
 | 26 | Macros collapse to one sentence | 28 Aug | The table was far too much apparatus. Reasoning is available by asking, not displayed. |
