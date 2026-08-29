@@ -102,6 +102,11 @@ export interface Dish {
   effort: 1 | 2 | 3 | 4 | 5
   servesWell: DinerId[]
   fork?: ForkInstruction
+  // How it is actually made, in Hindi, in the cook's own units. The kitchen
+  // narrative is assembled from these lines rather than written fresh each time:
+  // a quantity that reaches the person holding the pan has to be one somebody
+  // wrote down, not one that was improvised on the way out of the door.
+  methodHi?: string[]
   // Newly ingested dishes ship with fuller instructions for their first outings.
   status: 'candidate' | 'active' | 'retired'
   addedAt: number
