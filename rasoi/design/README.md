@@ -18,8 +18,7 @@ goes to the cook, in Hindi.
 The first three are the same screen at three moments, not three screens. The day card never
 scrolls; the conversation scrolls beneath it.
 
-Screens are static mockups. Colours and type follow the service schema, not the archived
-restaurant app.
+Screens are static mockups. Colours and type follow the service schema.
 
 ## Rebuilding
 

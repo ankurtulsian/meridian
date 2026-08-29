@@ -1,14 +1,16 @@
 # Deploying Rasoi
 
-Rasoi lives in `rasoi/` inside a repository named `meridian`. That one fact drives most of
-the settings below: Vercel has to be told to build from the subfolder, or it will look at
-the repository root, find the archived restaurant app's config, and build the wrong thing.
+Rasoi lives in `rasoi/` inside a repository named `meridian` — a historical name, kept so
+existing paths keep working. That one fact drives most of the settings below: Vercel has to
+be told to build from the subfolder. Pointed at the repository root it finds no application
+at all and the build fails with `Couldn't find any \`pages\` or \`app\` directory`. This is
+not hypothetical — it is exactly how the first two deployments failed.
 
 ## Settings
 
 | Setting | Value | Why |
 |---|---|---|
-| Project name | `rasoi` | `meridian` is taken by the archived restaurant app |
+| Project name | `rasoi` | A separate `meridian` project already exists in the same Vercel account |
 | Framework | Next.js | Auto-detected; no `vercel.json` is needed |
 | Root directory | `rasoi` | The app is not at the repository root |
 | Production branch | `main` | Rasoi is the repository's main line |

@@ -9,7 +9,7 @@ out/
 build/
 dist/
 
-# secrets — README asks for ANTHROPIC_API_KEY and GOOGLE_PLACES_API_KEY here
+# secrets — see rasoi/DEPLOY.md for the variables the app needs
 .env
 .env*.local
 

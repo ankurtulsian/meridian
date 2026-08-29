@@ -1,13 +1,19 @@
-# Workspace
+# Rasoi
 
-The repository is still called `meridian`, so nothing you have cloned or bookmarked changes.
-Inside, it is now a container for separate pieces of work rather than a single app.
+Daily menu planning for the house — what gets cooked, settled by talking rather than by
+filling in a form, with the instructions handed to a cook who reads and speaks Hindi.
 
-| Folder | What it is |
+The repository is named `meridian` for historical reasons: it began as a different app, and
+the name was kept so existing clones, paths and bookmarks keep working. That app has been
+deleted — only the name remains.
+
+| Path | What it is |
 |---|---|
-| `rasoi/` | **Active.** Daily menu planning for the house — the current work. |
-| `Meridian_archived/` | The Dubai restaurant concierge. Finished with; kept for reference. |
+| `rasoi/` | The app. Self-contained: its own `package.json`, its own build. |
+| `rasoi/DEPLOY.md` | How it is deployed, and the environment variables it needs. |
+| `rasoi/design/` | The phone screens as editable artboards. |
 
-`rasoi/` imports nothing from `Meridian_archived/`, so either can move out on its own.
+Because the app sits in `rasoi/` rather than at the root, anything building this repository
+has to be pointed at that folder. `rasoi/DEPLOY.md` covers it.
 
 See `CLAUDE.md` for how the work is run and `.claude/notebook.md` for what is open.

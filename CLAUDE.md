@@ -1,17 +1,18 @@
-# Workspace
+# Rasoi
 
-The repository is still named `meridian` so existing paths keep working, but it is a
-container for separate pieces of work, not a single app. Active work is `rasoi/`; the
-restaurant concierge sits finished in `Meridian_archived/` and shares nothing with it.
+Daily menu planning for the house. Next.js + TypeScript, living in `rasoi/`.
 
-## Rasoi — daily menu planning (active work)
+The repository is named `meridian` for historical reasons — it began as a different app, and
+the name was kept so existing paths keep working. Rasoi is the only app here.
+
+## The app
 
 A household menu planner for Ankur, Shruti and Krishna, with instructions handed to a cook
 who reads and speaks Hindi. The design is recorded in a service schema published as an
 artifact; the notebook tracks what is decided and what is open.
 
-`rasoi/` is self-contained — nothing in it imports from the restaurant app, so it lifts
-out whole. `rasoi/lib/` holds the domain model and is deliberately **pure** — it imports nothing,
+`rasoi/` is self-contained — its own `package.json`, dependencies and build — so it lifts out
+whole. `rasoi/lib/` holds the domain model and is deliberately **pure** — it imports nothing,
 calls nothing, and knows about neither React nor any model API. Keep it that way: it is what
 lets the screen or the model change without disturbing the rules, and it is testable without
 mocking anything.
@@ -31,10 +32,7 @@ mocking anything.
 Two principles run through it: the system never claims to know more than it does, and it
 proposes rather than silently applying.
 
-## Meridian_archived — Dubai restaurant concierge
-
-A finished, earlier project. Not under development, and nothing in `rasoi/` depends on it.
-Its Next.js app, dependencies and config all live inside that folder.
+Deployment, and the environment variables it needs, are in `rasoi/DEPLOY.md`.
 
 ## How we work
 
