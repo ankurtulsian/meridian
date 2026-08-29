@@ -25,6 +25,9 @@ back in the canvas. Nothing else starts until this closes or Ankur redirects.
 | 5 | Recipe ingestion (YouTube, NYT, Instagram) | 28 Aug | Next after screens | Deliberately after, so a recipe record's shape is settled before building the thing that fills it. |
 | 6 | Database | 28 Aug | Next | Postgres from day one. History is the asset — losing it resets everything the system has learned. |
 | 7 | Integrations and services mapped | 28 Aug | Answered inline | Under $25/mo all-in, nearly all of it Claude. Offered to fold into the schema page; Ankur has not said either way. |
+| 8 | Should a menu follow a structure — a carb, something wet, something green | 28 Aug | Parked by Ankur | His words: figure out later. Nothing built for it; the generator stays unstructured until he says otherwise. |
+| 9 | What Krishna actually eats at dinner | 28 Aug | Blocked on Ankur | His food differs from theirs "quite a bit", so the two-menu design is right — but the mockup carries placeholders until the real dishes arrive. |
+| 7 | Integrations and services mapped | 28 Aug | Answered inline | Under $25/mo all-in, nearly all of it Claude. Offered to fold into the schema page; Ankur has not said either way. |
 
 ## Blocked on Ankur
 
@@ -78,6 +81,14 @@ in one line before making it.
 | 21 | No status labels on meals | 28 Aug | Ankur: he lives there, he knows whether lunch happened. The system still tracks it for rotation; it just isn't shown. |
 | 22 | "Add" removed | 28 Aug | A recipe, a note, a fridge photo are all just talking. Shared links land in Inspire. Two doors for one act was the mistake. |
 | 23 | "Today" is not a destination | 28 Aug | It is the home screen. |
+| 24 | Inspire is spoken, not a screen | 28 Aug | "Inspire me" is something you say. Third instance of the same error, so the rule is now explicit: if it can be spoken, it is not a screen. |
+| 25 | Voice is two-way; agreement is spoken | 28 Aug | The system asks questions and pushes back. Nothing is settled until Ankur says so out loud, prompted by it asking whether to send. |
+| 26 | Macros collapse to one sentence | 28 Aug | The table was far too much apparatus. Reasoning is available by asking, not displayed. |
+| 27 | Two menus in the output | 28 Aug | Krishna gets a menu of his own, highlighted as the same khichdi — so the cook sees one pot, not two. |
+| 28 | A review screen before sending | 28 Aug | The card and a narrative, seen in full before it reaches a person who will act on it. |
+| 29 | The plan stays visible while talking | 28 Aug | Ankur: otherwise he will not remember everything. Rules out a conventional chat layout. |
+| 30 | The system knows about food, not just about them | 28 Aug | Rice needs something wet beside it. Held as associations, learned or stated, and a breach prompts rather than blocks. |
+| 31 | The home screen opens with a broad question | 28 Aug | Planning starts from a constraint he already has. Asking is not proposing, so nothing is pre-planned. |
 | 24 | Inspire is spoken, not a screen | 28 Aug | "Inspire me" is something you say. Third instance of the same error, so the rule is now explicit: if it can be spoken, it is not a screen. |
 | 25 | Voice is two-way; agreement is spoken | 28 Aug | The system asks questions and pushes back. Nothing is settled until Ankur says so out loud, prompted by it asking whether to send. |
 | 26 | Macros collapse to one sentence | 28 Aug | The table was far too much apparatus. Reasoning is available by asking, not displayed. |
