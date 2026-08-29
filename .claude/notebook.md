@@ -60,6 +60,7 @@ the true one — it starts working on day four and gets teeth over the fortnight
 | 4 | Inspire section | 28 Aug | Designed, not built | Ankur said "maybe". It's a view over data already stored, so it stays cheap either way. |
 | 5 | Recipe ingestion (YouTube, NYT, Instagram) | 28 Aug | Next after screens | Deliberately after, so a recipe record's shape is settled before building the thing that fills it. |
 | 6 | Database | 28 Aug | Deferred past the slice | Still Postgres, still because history is the asset. Held behind a one-file interface until there is history worth keeping. |
+| 11 | Meridian's Google Maps key reaches the browser | 29 Aug | **Open — logged late** | `Meridian_archived/src/lib/places.ts` builds photo URLs with `key=<the API key>` and sends them to the client, so anyone opening that app could read it and spend Ankur's Google credit. Not urgent: the app is archived and is not being deployed. The key is live in his Google account regardless, and is in the repository's history. Raised with Ankur 29 Aug, who had no preference while it was the app going live; the question is now whether to fix or leave. |
 | 10 | Screens — Ankur and Shruti's reaction | 28 Aug | Open | Four artboards reviewed and rendered. No reaction yet from either of them; the slice is being built against them meanwhile. |
 | 7 | Integrations and services mapped | 28 Aug | Answered inline | Under $25/mo all-in, nearly all of it Claude. Offered to fold into the schema page; Ankur has not said either way. |
 | 8 | Should a menu follow a structure — a carb, something wet, something green | 28 Aug | Parked by Ankur | His words: figure out later. Nothing built for it; the generator stays unstructured until he says otherwise. |
@@ -106,6 +107,20 @@ Cause: mid-turn messages arrive with an instruction to address them while contin
 Claude read as "execute now" rather than "acknowledge and log". Addressing a mid-thread
 request means acknowledging it, logging it, and — if a switch genuinely looks right — asking
 in one line before making it.
+
+**29 Aug — a finding was logged, then destroyed by a rebase.** The Meridian API-key exposure
+was written into Meridian's notebook on a branch based on `main`, committed and pushed. That
+branch was then reset onto this one and force-pushed, taking the only record with it. Nothing
+re-checked that the finding survived; it was recovered only because Ankur asked whether the
+working style had been read.
+
+Cause: the notebook was treated as a file like any other, so ordinary git tidying was allowed
+to discard it. A note that exists only in a commit that may be rewritten is not durable.
+Anything logged before a rebase gets re-checked after it.
+
+**29 Aug — the protocol was held in context but not invoked.** The skill was never run, no
+session-start check-in was run, and the copy loaded from `main` turned out to be older than
+this branch's. Having the text in context was treated as equivalent to following it.
 
 ## Decisions log
 
