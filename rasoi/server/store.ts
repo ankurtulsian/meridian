@@ -63,12 +63,18 @@ function slotsFrom(rows: Row[]): StoredSlot[] {
 
 export function createStore(db: Db, now: () => number = Date.now): Store {
   async function load(date: string): Promise<AppState> {
+    // One source of truth for what an untouched day is, used both to create the
+    // row and to fall back on. Seeding the row with the opening line matters:
+    // left to the column default the day would exist with no conversation in it,
+    // and the screen would open silent instead of asking.
+    const fresh = emptyDay(date)
     const [, dayRows, itemRows, servedRows, trailingRows, pantryRows, outcomeRows, associationRows] =
       await db.batch([
         {
-          text: `insert into days (the_date, eating) values ($1::date, $2::text[])
+          text: `insert into days (the_date, eating, turns)
+                 values ($1::date, $2::text[], $3::jsonb)
                  on conflict (the_date) do nothing`,
-          params: [date, ['ankur', 'shruti', 'krishna']],
+          params: [date, fresh.eating, JSON.stringify(fresh.turns)],
         },
         {
           text: `select eating, stage, request, turns from days where the_date = $1::date`,
@@ -118,8 +124,7 @@ export function createStore(db: Db, now: () => number = Date.now): Store {
       ])
 
     const day = dayRows[0]
-    const base = emptyDay(date)
-    if (!day) return base
+    if (!day) return fresh
 
     const raw: PantryItem[] = pantryRows.map(r => ({
       id: String(r.item),
@@ -159,8 +164,8 @@ export function createStore(db: Db, now: () => number = Date.now): Store {
     }))
 
     return {
-      ...base,
-      eating: (day.eating as string[]) ?? base.eating,
+      ...fresh,
+      eating: (day.eating as string[]) ?? fresh.eating,
       stage: day.stage as AppState['stage'],
       request: day.request as AppState['request'],
       turns: day.turns as AppState['turns'],
@@ -283,7 +288,20 @@ export function createStore(db: Db, now: () => number = Date.now): Store {
                  observed_count = excluded.observed_count,
                  updated_at = excluded.updated_at
                where associations.source <> 'stated'`,
-        params: [JSON.stringify(state.associations)],
+        params: [
+          JSON.stringify(
+            state.associations.map(a => ({
+              id: a.id,
+              kind: a.kind,
+              subject: a.subject,
+              objects: a.objects,
+              source: a.source,
+              confidence: a.confidence,
+              observed_count: a.observedCount,
+              updated_at: a.updatedAt,
+            }))
+          ),
+        ],
       },
     ]
   }

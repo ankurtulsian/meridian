@@ -1,11 +1,12 @@
 import { PGlite } from '@electric-sql/pglite'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { dayFlavour } from '../../lib/flavour'
 import { DISH_BY_ID } from '../../lib/library'
 import { Db, ensureSchema, redact, resetSchemaMemo, Row } from '../db'
 import { PlanTurn } from '../planner'
 import { SCHEMA } from '../schema'
 import { createStore } from '../store'
+import { converseStubbed } from '../stub'
 
 // Postgres in-process, running the identical SQL the deployed app runs. It cannot
 // exercise anything Neon-specific — the HTTP driver, TLS negotiation, the pooled
@@ -38,9 +39,16 @@ const at = (daysAgo: number) => new Date(TODAY - daysAgo * DAY).toISOString().sl
 let pg: PGlite
 let db: Db
 
-beforeEach(async () => {
+// One Postgres for the file; the schema is dropped and rebuilt between tests.
+// Booting the WASM build costs seconds, and paying it sixteen times is minutes of
+// nothing happening.
+beforeAll(async () => {
   pg = new PGlite()
   db = adapter(pg)
+})
+
+beforeEach(async () => {
+  await pg.exec('drop schema if exists public cascade; create schema public;')
   resetSchemaMemo()
 })
 
@@ -270,5 +278,80 @@ describe('nothing leaks the credential', () => {
     expect(safe).not.toContain('hunter2')
     expect(safe).not.toContain('ankur:')
     expect(safe).toContain('<redacted>@')
+  })
+})
+
+describe('the stub path, end to end, against Postgres', () => {
+  // Exactly what the route does on each turn — read, take a turn, write — with
+  // the real store underneath. The HTTP shell around it is not exercised here;
+  // its failure path is, below.
+  async function turn(store: ReturnType<typeof createStore>, text: string, now: number) {
+    const state = await store.read()
+    const outcome = await converseStubbed(state, text, () => {}, now)
+    await store.write(outcome.state)
+    return outcome
+  }
+
+  it('holds a conversation, then becomes history the next day', async () => {
+    let clock = TODAY - DAY
+    const store = createStore(db, () => clock)
+
+    // Day one. Nothing is known, so nothing is claimed.
+    const opening = await store.read()
+    expect(opening.trailingDays).toEqual([])
+
+    await turn(store, 'something light for dinner', clock)
+    const planned = await turn(store, 'just dinner', clock)
+    const dinner = planned.state.slots.find(s => s.slot === 'dinner')!
+    expect(dinner.items.length).toBeGreaterThan(0)
+
+    // It survives the process, not just the request.
+    const reread = await createStore(db, () => clock).read()
+    expect(reread.slots.find(s => s.slot === 'dinner')!.items.map(i => i.dishId)).toEqual(
+      dinner.items.map(i => i.dishId)
+    )
+
+    // Day two: yesterday is now something the domain model can read.
+    clock = TODAY
+    const today = await store.read()
+    expect(today.slots.every(s => s.items.length === 0)).toBe(true)
+    expect(today.turns).toHaveLength(1)
+    expect(today.trailingDays).toHaveLength(1)
+    for (const item of dinner.items) {
+      expect(today.lastServedAt[item.dishId]).toBe(Date.parse(`${at(1)}T00:00:00Z`))
+    }
+  })
+
+  it('carries a mention of the fridge into the next day, worth less', async () => {
+    let clock = TODAY - 2 * DAY
+    const store = createStore(db, () => clock)
+    await turn(store, "there's a lot of bhindi lying around", clock)
+    expect((await store.read()).pantry.map(p => p.item)).toEqual(['bhindi'])
+
+    clock = TODAY
+    const later = await store.read()
+    expect(later.pantry.map(p => p.item)).toEqual(['bhindi'])
+    expect(later.pantry[0].confidence).toBeLessThan(0.8)
+  })
+})
+
+describe('when there is nowhere to keep anything', () => {
+  it('answers with a sentence naming the variable, not a stack trace', async () => {
+    const saved = process.env.DATABASE_URL
+    const savedDirect = process.env.DATABASE_URL_UNPOOLED
+    delete process.env.DATABASE_URL
+    delete process.env.DATABASE_URL_UNPOOLED
+    try {
+      const { GET } = await import('../../app/api/plan/route')
+      const response = await GET()
+      expect(response.status).toBe(503)
+      const body = (await response.json()) as { error: string }
+      expect(body.error).toContain('DATABASE_URL')
+      expect(body.error).toContain('Environment Variables')
+      expect(body.error).not.toMatch(/at [A-Za-z]+ \(|\.ts:\d+/)
+    } finally {
+      if (saved) process.env.DATABASE_URL = saved
+      if (savedDirect) process.env.DATABASE_URL_UNPOOLED = savedDirect
+    }
   })
 })
