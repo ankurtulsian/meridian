@@ -7,46 +7,55 @@ move, not reconstructed at the end.
 
 ## Active thread
 
-**Deploy — in progress, waiting on a Vercel token.**
+**Deploy — done and green. Two decisions outstanding before it is genuinely usable.**
 
 *Exit criterion:* a live URL Ankur opens on his phone, serving Rasoi from `rasoi/`, with the
-Anthropic key and the Neon string held in Vercel rather than in the repository.
+Anthropic key and the Neon string held in Vercel rather than in the repository. **Met, with
+one unverified step noted below.**
 
-**Cleared 29 Aug — the old blocker is gone.** The previous session could not reach Vercel and
-handed that over as the first thing to re-check. It is reachable from this session:
-`api.vercel.com` answers, and the 403 it returns is Vercel's own "missing authentication
-token", not the egress policy. The proxy records no blocked requests.
+**Live at https://rasoi-phi.vercel.app** (project `rasoi`, team `ankur-tulsian-s-projects`).
+Two production builds green: one on the deploy prep, one on the restaurant-app deletion.
 
-**Still blocked, and it is different from what was expected.** This container cannot reach the
-npm registry — a flat 403 on every package, the `vercel` CLI included — so the CLI route the
-handoff assumed is unavailable, and the app cannot be built or type-checked here either.
-Neither matters for the deploy: `scripts/deploy.sh` drives the same steps over the REST API
-with curl, and Vercel's own builders install the dependencies. It does mean the first real
-build of this code happens on Vercel.
+**What was actually wrong.** Not the environment, not the keys, not the code. The Vercel
+project had no root directory set, so it built the repository root, read the wrong
+`package.json` and failed with `Couldn't find any pages or app directory`. Two earlier
+deployments had already died that way. Setting `rootDirectory` to `rasoi` fixed it first try.
 
-**Decided with Ankur, 29 Aug.**
-- He supplies a Vercel token and Claude runs the deploy, rather than clicking it through
-  himself. Shortest expiry; deleted once the deploy is done.
-- Rasoi becomes the repository's main version, so later changes deploy on their own.
+**What the handoff got wrong, recorded so the next session does not repeat the search.**
+- Vercel was assumed unreachable. It is reachable — the 403 from `api.vercel.com` is Vercel's
+  own "missing authentication token", not the egress policy.
+- The keys were assumed missing. `ANTHROPIC_API_KEY` and `DATABASE_URL` were already on the
+  project, both sensitive, both scoped to production. Ankur was asked for them unnecessarily.
+- npm **is** blocked — a flat 403 on the registry — so the `vercel` CLI cannot be installed
+  and nothing here can be built or type-checked. The REST API over curl replaces it, and
+  Vercel's own builders install the dependencies.
 
-**Where it stands.** `rasoi/scripts/deploy.sh` and `rasoi/DEPLOY.md` are written and the
-branch is ready to become `main`. Outstanding: the token, the Neon string, the Anthropic key
-— and folding this branch into `main`, since Vercel pointed at this repository's main line
-would otherwise find only the archived restaurant app.
+**Not verified, and it should be said plainly.** `*.vercel.app` is blocked by this
+container's egress policy, so the deployed page has never been opened from here. The build
+compiled and deployed; nobody has yet seen Rasoi render. Ankur is the first.
 
-**Checked while preparing.** `@electric-sql/pglite` is a development-only dependency and is
-imported by tests alone; the production path goes through `neonDb()`. Nothing in the app
-would fail a Vercel build for that reason.
+**Blocking real use — Vercel Authentication is on** (`ssoProtection: all_except_custom_domains`).
+The URL sits behind a Vercel login, so Shruti cannot open it and neither can the cook.
+Turning it off makes the link itself the only access, since Rasoi has no login of its own.
+Ankur's call; asked 29 Aug, not yet answered.
 
-**What only Vercel can test.** Unchanged from the handoff: the Neon HTTP driver against the
-live service, TLS and channel-binding negotiation, whether `DATABASE_URL_UNPOOLED` exists in
-his project, and cold-start latency. The sandbox could not reach Neon, so PGlite carried the
-testing.
+**Still to do:** fold this branch into `main`. Ankur approved it; the deploy was run from the
+branch first so a broken build could not land on the main line. Now that two builds are
+green there is no reason to wait.
 
-**What day one honestly looks like.** An empty database means four dashes, "Nothing decided
-yet today", and no findings at all. Once a dinner is planned it says "Not enough history yet
-to say how this compares." That is worse than the fabricated fortnight it replaced, and it is
-the true one — it starts working on day four and gets teeth over the fortnight after.
+---
+
+**Restaurant app deleted — done, and the build survived it.**
+
+Delegated to an agent, which is how it should have been done from the start. The agent
+deleted the app and rewrote `README.md`, `CLAUDE.md` and `.gitignore` cleanly, then hit a
+usage limit before committing. Its work was checked rather than taken on trust: three stale
+references it never reached were fixed by hand, `rasoi/` was confirmed untouched and
+self-contained, and a fresh production build was run afterwards specifically to prove the
+deletion broke nothing. It is green.
+
+The notebook's decisions log and process notes were deliberately left intact. Decision 39
+records the deletion and supersedes 19 rather than rewriting it.
 
 ## Parking lot
 
@@ -69,7 +78,24 @@ the true one — it starts working on day four and gets teeth over the fortnight
 
 ## Blocked on Ankur
 
-1. **A Vercel token** — vercel.com → avatar → Settings → Tokens. Nothing deploys without it.
+1. **Vercel Authentication — on or off.** Until this is decided the link only works for him.
+   Off means anyone holding the URL can use Rasoi and spend his Anthropic credit; on means
+   everyone who needs it must be added to his Vercel team.
+2. **The Google Maps key.** Deleting the restaurant app did not revoke it. Still live in his
+   Google Cloud account, still in this repository's history. Only he can revoke it.
+3. **Revoke the deploy token** at vercel.com/account/settings/tokens once he is happy — it
+   passed through the chat and is no longer needed.
+4. **The old `meridian` Vercel project** still exists in his account, now pointing at a
+   repository with no restaurant app in it. Worth deleting; his call.
+
+*Cleared: the Neon string and the Anthropic key were never actually needed — both were
+already on the Vercel project.*
+
+---
+
+*Earlier, now closed:*
+
+1. ~~**A Vercel token**~~ — vercel.com → avatar → Settings → Tokens. Nothing deploys without it.
 2. **The Neon connection string** (`DATABASE_URL`). Not in the repository and the old
    container is gone, so it has to come from him. Without it the app loads and then reports
    the missing variable on every request.
