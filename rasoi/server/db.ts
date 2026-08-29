@@ -43,6 +43,37 @@ export interface Db {
   batch(statements: Statement[]): Promise<Row[][]>
 }
 
+// A connection string is a password with a hostname attached. The host may be
+// said out loud — it is what tells someone which database failed — and nothing
+// else derived from the string may reach a log, a response body or a screen.
+//
+// The classic way a password ends up in a log aggregator is an error handler
+// being helpful: a driver that echoes what it tried to connect to, wrapped by a
+// catch that passes `error.message` straight through. So the string is never
+// interpolated anywhere, and every message that leaves this file goes through the
+// scrubber below as well — belt and braces, because the driver's wording is not
+// ours to control and it can change in a patch release.
+const CREDENTIALS = /\b[a-z][a-z0-9+.-]*:\/\/[^\s/@]*@/gi
+
+export function redact(text: string): string {
+  return text.replace(CREDENTIALS, '<redacted>@')
+}
+
+function hostOf(url: string): string {
+  try {
+    return new URL(url).host
+  } catch {
+    return 'the configured host'
+  }
+}
+
+export class DatabaseUnreachable extends Error {
+  constructor(host: string, reason: string) {
+    super(`Could not reach the database at ${host}. ${redact(reason)}`)
+    this.name = 'DatabaseUnreachable'
+  }
+}
+
 export class MissingDatabaseUrl extends Error {
   constructor() {
     super(
@@ -57,13 +88,23 @@ export class MissingDatabaseUrl extends Error {
 
 function connect(url: string): Db {
   const sql = neon(url)
+  const host = hostOf(url)
   return {
     async batch(statements) {
       if (!statements.length) return []
-      const results = await sql.transaction(
-        statements.map(s => sql.query(s.text, s.params ?? []))
-      )
-      return results as Row[][]
+      try {
+        const results = await sql.transaction(
+          statements.map(s => sql.query(s.text, s.params ?? []))
+        )
+        return results as Row[][]
+      } catch (error) {
+        // Never rethrow the driver's own error object: its message, and its
+        // cause chain, are outside our control.
+        throw new DatabaseUnreachable(
+          host,
+          error instanceof Error ? error.message : String(error)
+        )
+      }
     },
   }
 }

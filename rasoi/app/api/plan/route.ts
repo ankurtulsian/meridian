@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { MissingDatabaseUrl } from '../../../server/db'
+import { DatabaseUnreachable, MissingDatabaseUrl, redact } from '../../../server/db'
 import { PlanEvent } from '../../../server/events'
 import { converse, hasApiKey } from '../../../server/claude'
 import { currentView } from '../../../server/planner'
@@ -13,11 +13,18 @@ export const dynamic = 'force-dynamic'
 // stack trace. The person who will hit this is the person who typed the
 // environment variable name, and a 500 with a stack in it tells him nothing about
 // which variable or where to put it.
+// Our own errors already name the host and nothing else. Anything else is
+// scrubbed on the way out, because an unrecognised error is exactly the one whose
+// wording nobody has checked.
 function unreachable(error: unknown): Response {
-  const message =
-    error instanceof MissingDatabaseUrl
-      ? error.message
-      : `Could not reach the database. ${error instanceof Error ? error.message : String(error)}`
+  const known = error instanceof MissingDatabaseUrl || error instanceof DatabaseUnreachable
+  const message = known
+    ? (error as Error).message
+    : redact(
+        `Something went wrong reaching the database. ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      )
   return Response.json({ error: message }, { status: 503 })
 }
 
@@ -73,7 +80,7 @@ export async function POST(request: NextRequest) {
           v: { view: outcome.view, card: outcome.card, turns: outcome.state.turns },
         })
       } catch (error) {
-        send({ t: 'error', v: error instanceof Error ? error.message : String(error) })
+        send({ t: 'error', v: redact(error instanceof Error ? error.message : String(error)) })
         // The page still gets a plan back, so a failed turn leaves it showing
         // what it showed before rather than an empty screen.
         const { view, card } = currentView(state)
