@@ -55,7 +55,7 @@ const TOOLS: Anthropic.Tool[] = [
   {
     name: 'shortlist',
     description:
-      'Rank what could go in a meal, given everything recorded so far — what was cooked recently, what is in the house, what they have asked for, who is eating. Returns candidates with the reasons behind their placing. You must call this before naming a dish for a meal, and you may only plan dishes it has returned.',
+      'Order everything the kitchen could put in a meal, given what was cooked recently, what is in the house, what they have asked for and who is eating. This is the whole eligible library in order, not a selection from it — every dish comes back, each with the reasons behind where it landed. The order is advice, not a ruling: something halfway down is a perfectly good answer when the reasons say so, and the weights behind the ordering are estimates nobody has yet fitted to real choices. Read the reasons, not the number. You must call this before naming a dish for a meal, and you may only plan dishes it has returned.',
     input_schema: {
       type: 'object',
       properties: {

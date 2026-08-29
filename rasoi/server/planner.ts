@@ -31,7 +31,18 @@ import { AppState, StoredSlot } from './session'
 // The same object serves the real model and the stub, so the stub exercises the
 // real machinery and fakes only the language.
 
-const SHORTLIST_SIZE = 12
+// A guard on the context window, not a judgement about quality.
+//
+// This used to be 12 against a library of 24, which meant the weights were not
+// ordering the list — they were deciding that half the kitchen did not exist
+// this turn. A weight nobody has fitted to anything should cost presentation
+// order at worst; it must never cost availability, least of all silently, when
+// the chooser cannot ask for what it was never shown.
+//
+// So it now sits well clear of the library and exists only so that a library
+// which grows past what fits in a prompt degrades gracefully instead of failing.
+// If it ever bites, the result says so rather than quietly shortening.
+const SHORTLIST_SIZE = 60
 
 // Krishna's own dinners are genuinely not known yet — his food differs from
 // theirs and nobody has said how. The second column stays open rather than
@@ -87,7 +98,6 @@ function daySlots(state: AppState): DaySlot[] {
 export interface Candidate {
   dishId: string
   nameEn: string
-  nameHi: string
   facets: string[]
   effort: number
   score: number
@@ -242,7 +252,10 @@ export class PlanTurn {
   // a carb beside a dal, something wet beside rice. Without it the plain staples
   // are systematically invisible: roti matches no mood and is cooked constantly,
   // so the ranker buries the very things that finish a meal.
-  shortlist(slot: MealSlot, satisfying?: string[]): { slot: MealSlot; candidates: Candidate[] } {
+  shortlist(
+    slot: MealSlot,
+    satisfying?: string[]
+  ): { slot: MealSlot; candidates: Candidate[]; truncated?: number } {
     const already = new Set(
       this.state.slots.find(s => s.slot === slot)?.items.map(i => i.dishId) ?? []
     )
@@ -256,9 +269,10 @@ export class PlanTurn {
           )
         )
       : DISHES
-    const scored = rank(field, scoringContext(this.state, this.now, slot))
-      .filter(s => !already.has(s.dishId))
-      .slice(0, SHORTLIST_SIZE)
+    const eligible = rank(field, scoringContext(this.state, this.now, slot)).filter(
+      s => !already.has(s.dishId)
+    )
+    const scored = eligible.slice(0, SHORTLIST_SIZE)
 
     const candidates = scored.map(s => {
       const dish = DISH_BY_ID[s.dishId]
@@ -266,7 +280,10 @@ export class PlanTurn {
       return {
         dishId: dish.id,
         nameEn: dish.nameEn,
-        nameHi: dish.nameHi,
+        // No Hindi name here. Every one of them is already in the dish library at
+        // the top of the prompt, which is cached and paid for once; repeating it
+        // per candidate per turn is the most expensive text in the payload and
+        // nothing reads it.
         facets: dish.facets,
         effort: dish.effort,
         score: Math.round(s.score * 100) / 100,
@@ -276,7 +293,9 @@ export class PlanTurn {
     // Anything already on the plan stays choosable, so a slot can be rebuilt
     // without dropping what was kept.
     already.forEach(id => this.offered.add(id))
-    return { slot, candidates }
+    return eligible.length > scored.length
+      ? { slot, candidates, truncated: eligible.length - scored.length }
+      : { slot, candidates }
   }
 
   setPlan(
