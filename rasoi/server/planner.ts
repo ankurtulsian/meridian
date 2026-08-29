@@ -10,7 +10,8 @@ import { rank, ScoringContext } from '../lib/scoring'
 import { STAPLES } from '../lib/seed'
 import { DINERS } from '../lib/seed'
 import {
-  ConstraintDimension, Dish, DinerId, MealSlot, MenuItem, PantryItem, ValidationResult,
+  ConstraintDimension, Dish, DinerId, EditEvent, EditKind, MealSlot, MenuItem, PantryItem,
+  ValidationResult,
 } from '../lib/types'
 import { DaySlot, validateDay, ValidationContext } from '../lib/validate'
 import {
@@ -200,6 +201,44 @@ export class PlanTurn {
     this.state.turns = [...this.state.turns, { role, text }]
   }
 
+  // Every tweak, with the context it happened in.
+  //
+  // This is the primary learning channel and it costs nothing to capture: it is
+  // caught during work that is happening anyway, and a substitution says both what
+  // was rejected and what was wanted instead, which no rating does. Nothing reads
+  // it back yet — the rule loop is not built — and that is precisely why it has to
+  // start now. The day it is built, it can only be fitted against behaviour that
+  // was already being recorded.
+  private log(
+    kind: EditKind,
+    detail: { slot?: MealSlot; fromDishId?: string; toDishId?: string; otherDishIds?: string[] }
+  ): void {
+    const said = this.state.request.said
+    const lastUser = [...this.state.turns].reverse().find(t => t.role === 'user')
+    const edit: EditEvent = {
+      id: `e-${this.now}-${this.state.edits.length}-${Math.random().toString(36).slice(2, 8)}`,
+      planId: this.state.date,
+      kind,
+      fromDishId: detail.fromDishId,
+      toDishId: detail.toDishId,
+      // The exact words. 'We don't have paneer' is an inventory correction wearing
+      // the clothes of a taste signal, and only the phrasing tells them apart.
+      raw: lastUser?.text ?? '',
+      context: {
+        date: this.state.date,
+        slot: detail.slot,
+        eating: this.state.eating,
+        otherDishIds: detail.otherDishIds ?? [],
+        requestPhrase: said[said.length - 1],
+      },
+      // Nobody signs in, so nobody is identified. Saying 'household' is true;
+      // guessing which of them typed it would not be.
+      by: 'household',
+      at: this.now,
+    }
+    this.state.edits = [...this.state.edits, edit]
+  }
+
   // --- tools -------------------------------------------------------------
 
   stateConstraint(input: ConstraintInput): { ok: true; conflict?: string; active: string[] } {
@@ -214,6 +253,8 @@ export class PlanTurn {
     }
     const { state, conflict } = applyConstraint(this.state.request, constraint)
     this.state.request = state
+    // No slot: a constraint re-ranks the whole menu rather than one meal.
+    this.log('constraint', {})
     return {
       ok: true,
       conflict: conflict?.note,
@@ -245,6 +286,9 @@ export class PlanTurn {
         lastConfirmedAt: this.now,
       })
     }
+    // Writes to the pantry, never to preferences. Filing it as taste would teach
+    // the system to avoid a dish the household actually likes.
+    this.log('fact-correction', {})
     return { ok: true, pantry: this.state.pantry.map(p => `${p.item} (${p.quantitySignal})`) }
   }
 
@@ -325,6 +369,7 @@ export class PlanTurn {
     }
 
     const target = this.state.slots.find(s => s.slot === slot)
+    const before = target?.items.map(i => i.dishId) ?? []
     const kept = target?.items.filter(i => i.pinned && dishIds.includes(i.dishId)) ?? []
     const items: MenuItem[] = dishIds.map(dishId => {
       const existing = kept.find(k => k.dishId === dishId)
@@ -346,6 +391,21 @@ export class PlanTurn {
     }
     // A plan that changed after agreement is no longer an agreed plan.
     if (this.state.stage !== 'open') this.state.stage = 'open'
+
+    // What came off, and what went on in its place. A dish arriving with nothing
+    // displaced is not logged: there is no edit kind for it and it says little,
+    // where a swap says both what was refused and what was wanted instead.
+    const removed = before.filter(id => !dishIds.includes(id))
+    const added = dishIds.filter(id => !before.includes(id))
+    removed.forEach((fromDishId, index) => {
+      const toDishId = added[index]
+      this.log(toDishId ? 'substitution' : 'rejection', {
+        slot,
+        fromDishId,
+        toDishId,
+        otherDishIds: dishIds.filter(id => id !== toDishId),
+      })
+    })
 
     const validation = validateDay(daySlots(this.state), validationContext(this.state, this.now))
     const { remark } = this.remark(validation)

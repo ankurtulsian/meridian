@@ -1,8 +1,8 @@
 import { Association } from '../lib/associations'
-import { ASSOCIATIONS, DISH_BY_ID } from '../lib/library'
-import { emptyRequest, RequestState } from '../lib/request'
-import { DinerId, MealSlot, MenuItem, Nutrition, PantryItem, PlateOutcome } from '../lib/types'
-import { Stage, sumNutrition, Turn } from '../lib/view'
+import { emptyRequest } from '../lib/request'
+import { DinerId, EditEvent, MealSlot, MenuItem, Nutrition, PantryItem, PlateOutcome } from '../lib/types'
+import { RequestState } from '../lib/request'
+import { SLOT_ORDER, Stage, Turn } from '../lib/view'
 
 export type { Turn }
 
@@ -19,113 +19,50 @@ export interface AppState {
   request: RequestState
   slots: StoredSlot[]
   stage: Stage
+  // Carried across days now, with the age of the belief attached. What is not
+  // here has aged out rather than been deleted.
   pantry: PantryItem[]
-  // What was thought of any of it. Empty, and it stays empty until somebody says
-  // — the system knows what it planned, which is not the same as knowing how it
-  // went down, and guessing the difference is how these things start lying.
+  // How it went down, as opposed to what was planned. Still empty in practice —
+  // nothing asks — but it is read history now rather than an empty literal.
   outcomes: PlateOutcome[]
+  // Derived, not stored: the last day each dish was actually on a plan, and the
+  // macro totals of the days behind today. Both come out of the plan history.
   lastServedAt: Record<string, number | null>
   trailingDays: Nutrition[]
   associations: Association[]
+  // Write-only for now. Every tweak is logged from today so that the day rules
+  // are fitted to real behaviour there is behaviour to fit them to; nothing reads
+  // it back yet, so `read` returns it empty.
+  edits: EditEvent[]
 }
 
-const DAY_MS = 86_400_000
-
-function isoDate(t: number): string {
+export function isoDate(t: number): string {
   return new Date(t).toISOString().slice(0, 10)
 }
 
-// FABRICATED. A fortnight of plausible history, invented so the arithmetic has
-// something to stand on: without it every dish is equally fresh, and the flavour
-// line can only say "not enough history yet". It is the one thing in the running
-// system that nobody told it. Replace it with the real thing the moment there is
-// one — the shape is already right.
-function fabricatedHistory(now: number): {
-  lastServedAt: Record<string, number | null>
-  trailingDays: Nutrition[]
-} {
-  const daysAgo = (n: number) => now - n * DAY_MS
-  // Written as days rather than as numbers, and summed from the library, so the
-  // baseline is always a baseline of food this kitchen actually makes. Hand-typed
-  // totals drift away from the dishes the moment either one is edited.
-  const days: string[][] = [
-    ['poha', 'chai', 'chole', 'roti', 'kachumber', 'khichdi', 'curd'],
-    ['upma', 'chai', 'rajma-chawal', 'palak-paneer', 'roti'],
-    ['besan-chilla', 'chai', 'kadhi-chawal', 'bhindi-masala', 'roti'],
-    ['poha', 'chai', 'dal-tadka', 'jeera-rice', 'kachumber', 'curd'],
-    ['aloo-paratha', 'chai', 'lauki-chana-dal', 'roti', 'baingan-bharta'],
-    ['idli-sambar', 'chai', 'paneer-butter-masala', 'roti', 'veg-pulao'],
-  ]
-
+// A day nobody has said anything about yet.
+//
+// There is no history here and none is invented. On the very first run every
+// backward-looking reading is empty, and each of them already knows how to say
+// so: the flavour line reports that there is not enough history to compare
+// against, the repeat checks stay quiet because nothing has been made before, and
+// the protein run needs three days it does not have. That is a worse screen than
+// the fabricated fortnight it replaces, and it is the true one.
+export function emptyDay(date: string, eating: DinerId[] = ['ankur', 'shruti', 'krishna']): AppState {
   return {
-    lastServedAt: {
-      'rajma-chawal': now,
-      poha: now,
-      chai: now,
-      kachumber: now,
-      roti: daysAgo(1),
-      'dal-tadka': daysAgo(2),
-      'bhindi-masala': daysAgo(3),
-      'aloo-paratha': daysAgo(4),
-      chole: daysAgo(6),
-      'kadhi-chawal': daysAgo(8),
-      khichdi: daysAgo(9),
-      'paneer-butter-masala': daysAgo(11),
-      'jeera-rice': daysAgo(2),
-      curd: daysAgo(2),
-      upma: daysAgo(5),
-    },
-    trailingDays: days.map(ids =>
-      sumNutrition(ids.map(id => DISH_BY_ID[id]).filter(Boolean))
-    ),
-  }
-}
-
-// Breakfast and lunch are behind them — settled elsewhere, not by us, and still
-// shaping what dinner should be. That is the whole reason the day is the unit.
-export function seedState(now: number = Date.now()): AppState {
-  const { lastServedAt, trailingDays } = fabricatedHistory(now)
-  return {
-    date: isoDate(now),
-    eating: ['ankur', 'shruti', 'krishna'],
+    date,
+    eating,
     turns: [
-      {
-        role: 'assistant',
-        text: 'Anything particular in mind, or shall I suggest something?',
-      },
+      { role: 'assistant', text: 'Anything particular in mind, or shall I suggest something?' },
     ],
     request: emptyRequest(),
-    slots: [
-      {
-        slot: 'breakfast',
-        source: 'given',
-        items: [
-          { dishId: 'poha', pinned: true, outcome: 'cooked' },
-          { dishId: 'chai', pinned: true, outcome: 'cooked' },
-        ],
-      },
-      {
-        slot: 'lunch',
-        source: 'given',
-        items: [
-          { dishId: 'rajma-chawal', pinned: true, outcome: 'cooked' },
-          { dishId: 'kachumber', pinned: true, outcome: 'cooked' },
-        ],
-      },
-      { slot: 'snacks', source: 'planned', items: [] },
-      { slot: 'dinner', source: 'planned', items: [] },
-    ],
+    slots: SLOT_ORDER.map(slot => ({ slot, source: 'planned' as const, items: [] })),
     stage: 'open',
-    // The fridge is only ever what he says it is. Nothing infers it, so it starts
-    // empty and stays empty until he mentions something.
     pantry: [],
     outcomes: [],
-    lastServedAt,
-    trailingDays,
-    associations: ASSOCIATIONS,
+    lastServedAt: {},
+    trailingDays: [],
+    associations: [],
+    edits: [],
   }
-}
-
-export function isStale(state: AppState, now: number = Date.now()): boolean {
-  return state.date !== isoDate(now)
 }

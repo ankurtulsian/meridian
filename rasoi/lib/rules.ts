@@ -95,8 +95,9 @@ export function narrowingCondition(
   for (const key of SCOPE_KEYS) {
     if (rule.conditions[key] !== undefined) continue
     const values = new Set(against.map(e => JSON.stringify(e.context[key])))
-    // One shared value across every contradiction is the missing condition.
-    if (values.size === 1) {
+    // One shared value across every contradiction is the missing condition — but
+    // a shared *absence* is not a condition, it is the same lack of one.
+    if (values.size === 1 && against[0].context[key] !== undefined) {
       return { ...rule.conditions, [key]: against[0].context[key] }
     }
   }

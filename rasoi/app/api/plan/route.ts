@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server'
+import { MissingDatabaseUrl } from '../../../server/db'
 import { PlanEvent } from '../../../server/events'
 import { converse, hasApiKey } from '../../../server/claude'
 import { currentView } from '../../../server/planner'
@@ -8,22 +9,36 @@ import { converseStubbed } from '../../../server/stub'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-// GET rehydrates the page: the day as it stands, with no turn taken.
+// Anything that goes wrong reaching the database comes back as a sentence, not a
+// stack trace. The person who will hit this is the person who typed the
+// environment variable name, and a 500 with a stack in it tells him nothing about
+// which variable or where to put it.
+function unreachable(error: unknown): Response {
+  const message =
+    error instanceof MissingDatabaseUrl
+      ? error.message
+      : `Could not reach the database. ${error instanceof Error ? error.message : String(error)}`
+  return Response.json({ error: message }, { status: 503 })
+}
+
 export async function GET() {
-  const state = await read()
-  const { view, card } = currentView(state)
-  return Response.json({
-    view,
-    card,
-    turns: state.turns,
-    stubbed: !hasApiKey(),
-  })
+  try {
+    const state = await read()
+    const { view, card } = currentView(state)
+    return Response.json({ view, card, turns: state.turns, stubbed: !hasApiKey() })
+  } catch (error) {
+    return unreachable(error)
+  }
 }
 
 export async function DELETE() {
-  const state = await reset()
-  const { view, card } = currentView(state)
-  return Response.json({ view, card, turns: state.turns, stubbed: !hasApiKey() })
+  try {
+    const state = await reset()
+    const { view, card } = currentView(state)
+    return Response.json({ view, card, turns: state.turns, stubbed: !hasApiKey() })
+  } catch (error) {
+    return unreachable(error)
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -31,9 +46,16 @@ export async function POST(request: NextRequest) {
   const text = typeof body.text === 'string' ? body.text.trim() : ''
   if (!text) return new Response('Say something first.', { status: 400 })
 
-  const state = await read()
-  const encoder = new TextEncoder()
+  // Read before opening the stream: a database that cannot be reached is a
+  // readable failure, not a stream that dies halfway through a sentence.
+  let state
+  try {
+    state = await read()
+  } catch (error) {
+    return unreachable(error)
+  }
 
+  const encoder = new TextEncoder()
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       const send = (event: PlanEvent) => {
@@ -51,8 +73,7 @@ export async function POST(request: NextRequest) {
           v: { view: outcome.view, card: outcome.card, turns: outcome.state.turns },
         })
       } catch (error) {
-        const message = error instanceof Error ? error.message : String(error)
-        send({ t: 'error', v: message })
+        send({ t: 'error', v: error instanceof Error ? error.message : String(error) })
         // The page still gets a plan back, so a failed turn leaves it showing
         // what it showed before rather than an empty screen.
         const { view, card } = currentView(state)

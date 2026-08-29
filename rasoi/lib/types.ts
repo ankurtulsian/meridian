@@ -213,7 +213,11 @@ export type EditKind =
 
 export interface EditContext {
   date: string
-  slot: MealSlot
+  // Absent when what was said was about the day rather than one meal — which is
+  // most of what a constraint is, since a constraint re-ranks the whole menu.
+  // Rule scoping already treats an absent dimension as "does not pin this down",
+  // so this is the honest way to say a statement was not slot-specific.
+  slot?: MealSlot
   eating: DinerId[]
   otherDishIds: string[]
   requestPhrase?: string

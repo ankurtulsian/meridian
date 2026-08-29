@@ -15,6 +15,8 @@ interface Payload {
   card: KitchenCard | null
   turns: Turn[]
   stubbed?: boolean
+  // Set instead of everything else when there is nowhere to keep anything.
+  error?: string
 }
 
 type Event =
@@ -32,15 +34,25 @@ export default function Page() {
   const [failed, setFailed] = useState<string | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
   const [clock, setClock] = useState('')
+  const [unreachable, setUnreachable] = useState<string | null>(null)
   const talkRef = useRef<HTMLDivElement>(null)
 
   const load = useCallback(async (method: 'GET' | 'DELETE' = 'GET') => {
-    const response = await fetch('/api/plan', { method, cache: 'no-store' })
-    const payload = (await response.json()) as Payload
-    setView(payload.view)
-    setCard(payload.card)
-    setTurns(payload.turns)
-    setSheetOpen(false)
+    try {
+      const response = await fetch('/api/plan', { method, cache: 'no-store' })
+      const payload = (await response.json()) as Payload
+      if (payload.error) {
+        setUnreachable(payload.error)
+        return
+      }
+      setUnreachable(null)
+      setView(payload.view)
+      setCard(payload.card)
+      setTurns(payload.turns)
+      setSheetOpen(false)
+    } catch (error) {
+      setUnreachable(error instanceof Error ? error.message : String(error))
+    }
   }, [])
 
   useEffect(() => {
@@ -111,6 +123,27 @@ export default function Page() {
       setBusy(false)
     }
   }, [])
+
+  // Said plainly, on the screen, because the person who can fix it is the person
+  // looking at it.
+  if (unreachable) {
+    return (
+      <div className="frame">
+        <div className="head">
+          <div className="head-left">
+            <div className="wordmark">Rasoi</div>
+            <div className="stamp">Not set up yet</div>
+          </div>
+        </div>
+        <div className="middle">
+          <p className="remark">{unreachable}</p>
+        </div>
+        <button type="button" className="bar" onClick={() => void load()}>
+          <span style={{ fontSize: 16, fontWeight: 600 }}>Try again</span>
+        </button>
+      </div>
+    )
+  }
 
   if (!view) {
     return (
