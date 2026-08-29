@@ -179,6 +179,41 @@ export function createStore(db: Db, now: () => number = Date.now): Store {
     }
   }
 
+  // Named rather than positional: the first-boot seed reuses exactly this
+  // statement, and picking it out of the list by index would break silently the
+  // first time the list is reordered.
+  function associationUpsert(associations: Association[]): Statement {
+    return {
+      text: `insert into associations
+                 (id, kind, subject, objects, source, confidence, observed_count, updated_at)
+               select a.id, a.kind, a.subject, a.objects, a.source, a.confidence,
+                      a.observed_count, to_timestamp(a.updated_at / 1000.0)
+               from jsonb_to_recordset($1::jsonb)
+                 as a(id text, kind text, subject text, objects text[], source text,
+                      confidence float8, observed_count int, updated_at float8)
+               on conflict (id) do update set
+                 objects = excluded.objects,
+                 confidence = excluded.confidence,
+                 observed_count = excluded.observed_count,
+                 updated_at = excluded.updated_at
+               where associations.source <> 'stated'`,
+        params: [
+          JSON.stringify(
+            associations.map(a => ({
+              id: a.id,
+              kind: a.kind,
+              subject: a.subject,
+              objects: a.objects,
+              source: a.source,
+              confidence: a.confidence,
+              observed_count: a.observedCount,
+              updated_at: a.updatedAt,
+            }))
+          ),
+        ],
+    }
+  }
+
   function writeStatements(state: AppState): Statement[] {
     const items = state.slots.flatMap(s =>
       s.items.map((item, ordinal) => ({
@@ -272,37 +307,7 @@ export function createStore(db: Db, now: () => number = Date.now): Store {
           ),
         ],
       },
-      // Assumptions the library ships with arrive if they are new, and never
-      // overwrite one the household has since corrected.
-      {
-        text: `insert into associations
-                 (id, kind, subject, objects, source, confidence, observed_count, updated_at)
-               select a.id, a.kind, a.subject, a.objects, a.source, a.confidence,
-                      a.observed_count, to_timestamp(a.updated_at / 1000.0)
-               from jsonb_to_recordset($1::jsonb)
-                 as a(id text, kind text, subject text, objects text[], source text,
-                      confidence float8, observed_count int, updated_at float8)
-               on conflict (id) do update set
-                 objects = excluded.objects,
-                 confidence = excluded.confidence,
-                 observed_count = excluded.observed_count,
-                 updated_at = excluded.updated_at
-               where associations.source <> 'stated'`,
-        params: [
-          JSON.stringify(
-            state.associations.map(a => ({
-              id: a.id,
-              kind: a.kind,
-              subject: a.subject,
-              objects: a.objects,
-              source: a.source,
-              confidence: a.confidence,
-              observed_count: a.observedCount,
-              updated_at: a.updatedAt,
-            }))
-          ),
-        ],
-      },
+      associationUpsert(state.associations),
     ]
   }
 
@@ -325,7 +330,7 @@ export function createStore(db: Db, now: () => number = Date.now): Store {
         // First boot: the library's general assumptions become rows so that a
         // correction has something to correct.
         if (!state.associations.length || state.associations === ASSOCIATIONS) {
-          await db.batch(writeStatements({ ...state, associations: ASSOCIATIONS }).slice(-1))
+          await db.batch([associationUpsert(ASSOCIATIONS)])
         }
         return state
       }),
