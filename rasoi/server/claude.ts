@@ -15,7 +15,7 @@ const TOOLS: Anthropic.Tool[] = [
   {
     name: 'state_constraint',
     description:
-      'Record something they have said about what they want, so it competes in the ranking and so a later statement that contradicts it can be named rather than silently resolved. One value per dimension: stating a new one replaces the old one and you are told what it replaced. Use a facet from the fixed vocabulary as the value for mood and nutrition.',
+      'Record something they have said about what they want, so it competes in the ranking and so a later statement that contradicts it can be named rather than silently resolved. One value per dimension, and a new one replaces the old — except ingredients, where each item is tracked separately, so ruling out onions does not undo asking for the paneer.',
     input_schema: {
       type: 'object',
       properties: {
@@ -23,7 +23,11 @@ const TOOLS: Anthropic.Tool[] = [
           type: 'string',
           enum: ['diners', 'slot', 'mood', 'nutrition', 'ingredient', 'effort', 'variety', 'occasion'],
         },
-        value: { type: 'string', description: 'For mood and nutrition, a facet from the vocabulary.' },
+        value: {
+          type: 'string',
+          description:
+            'Depends on the dimension. For mood, nutrition and occasion, a facet from the fixed vocabulary. For ingredient, the ingredient in lowercase — prefixed with a minus to rule it out, so "use up the paneer" is "paneer" and "no onions" is "-onion". For effort, one of low, quick, easy, simple, weeknight, high, elaborate, proper, project. For variety, one of new, different, change, usual, familiar, favourite.',
+        },
         raw: { type: 'string', description: 'Their own words, verbatim.' },
         strength: {
           type: 'string',
@@ -56,6 +60,12 @@ const TOOLS: Anthropic.Tool[] = [
       type: 'object',
       properties: {
         slot: { type: 'string', enum: ['breakfast', 'lunch', 'snacks', 'dinner'] },
+        satisfying: {
+          type: 'array',
+          items: { type: 'string' },
+          description:
+            'Optional. Narrows the field to dishes that would answer a particular gap — pass the options from a breach, such as roti or rice for a dal with no carb beside it. Without this the plain staples rarely surface: they match no mood and are cooked constantly, so the ranking buries them.',
+        },
       },
       required: ['slot'],
     },
@@ -97,7 +107,8 @@ function run(turn: PlanTurn, name: string, input: unknown): unknown {
     case 'shortlist': {
       const slot = slotOf(String(args.slot))
       if (!slot) return { error: 'Unknown meal.' }
-      return turn.shortlist(slot)
+      const satisfying = Array.isArray(args.satisfying) ? args.satisfying.map(String) : undefined
+      return turn.shortlist(slot, satisfying)
     }
     case 'set_plan': {
       const slot = slotOf(String(args.slot))

@@ -2,7 +2,7 @@ import { DISHES, FACETS } from '../lib/library'
 import { DINERS } from '../lib/seed'
 import { AppState } from './session'
 import { DISH_BY_ID } from '../lib/library'
-import { activeConstraints } from '../lib/request'
+import { activeConstraints, itemOf } from '../lib/request'
 
 // Everything in this file above the cache breakpoint is frozen at module load and
 // never varies: no date, no plan, no names of the moment. That is not tidiness —
@@ -21,7 +21,6 @@ You choose and you speak. You do not rank, you do not work out balance, and you 
 Concretely:
 - Never name a dish for a meal until \`shortlist\` has returned it this turn. The ranking accounts for what was cooked this fortnight, what is in the house and what they have asked for; a dish that sounds right but was not offered is a dish you have guessed at.
 - Never state a calorie or gram figure. The estimates are good to about a fifth either way, and a number pretends to a precision that is not there. \`set_plan\` hands you back one sentence about how the day compares with how they usually eat. Use that sentence, or say nothing about it.
-- The ranking knows nothing about which meal it is ranking for. Poha and upma will come back as candidates for dinner; that is the ranking working as built, and declining them is your job, not its.
 - Never invent what Krishna eats. His food differs from theirs and nobody has told you how. His column stays open, and if it comes up, say so plainly.
 - Never assume what is in the fridge. It is empty until they mention something, and then it is only what they said.
 
@@ -37,7 +36,7 @@ Explain when asked, from what the tools told you, not from general knowledge abo
 
 ## The shape of a turn
 
-1. If they said something that changes what they want — lighter, no onions, only for two, whatever it is — record it with \`state_constraint\` so it competes properly and so it is visible when it contradicts something they said earlier.
+1. If they said something that changes what they want — lighter, no onions, use up the paneer, nothing elaborate, only for two — record it with \`state_constraint\` so it competes properly and so it is visible when it contradicts something they said earlier. An ingredient they want is its own name; one they are ruling out is the same name with a minus in front. Every dimension reaches the ranking, so recording it is what makes it count.
 2. If they mentioned something in the house, record it with \`note_pantry\`.
 3. If a meal needs choosing or changing, call \`shortlist\` for that meal and pick from what comes back.
 4. Put your choice in with \`set_plan\`. It hands you back the balance findings and the day's flavour. Speak to anything real in there.
@@ -91,7 +90,12 @@ export function stateBlock(state: AppState, now: Date): string {
     ...lines,
     ``,
     constraints.length
-      ? `Standing in this conversation: ${constraints.map(c => `${c.dimension} = ${c.value} ("${c.raw}")`).join('; ')}.`
+      ? `Standing in this conversation: ${constraints
+          .map(c => {
+            const value = c.value.startsWith('-') ? `no ${itemOf(c.value)}` : c.value
+            return `${c.dimension} = ${value} ("${c.raw}")`
+          })
+          .join('; ')}.`
       : `Nothing constrained yet in this conversation.`,
     state.pantry.length
       ? `Mentioned as being in the house: ${state.pantry.map(p => `${p.item} — ${p.quantitySignal}`).join('; ')}.`

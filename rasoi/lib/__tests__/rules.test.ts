@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { dayFlavour } from '../flavour'
 import { buildCard, INGREDIENT_HI } from '../card'
-import { DISHES, DISH_BY_ID } from '../library'
+import { breaches } from '../associations'
+import { ASSOCIATIONS, DISHES, DISH_BY_ID } from '../library'
+import { applyConstraint, emptyRequest, ingredientWishes } from '../request'
 import { rank } from '../scoring'
 import { DINERS, STAPLES } from '../seed'
 import { Nutrition } from '../types'
@@ -135,5 +137,90 @@ describe('the card is readable by the person it is for', () => {
     expect(card.method.join(' ')).not.toMatch(/[A-Za-z]/)
     expect(card.method[0]).toContain('कटोरी')
     expect(card.rows[0].noteHi).toContain('कृष्णा')
+  })
+})
+
+describe('the ranking hears what was actually said', () => {
+  it('demotes a morning dish at dinner without banning it', () => {
+    const atBreakfast = rank(DISHES, ctx({ slot: 'breakfast' })).findIndex(d => d.dishId === 'poha')
+    const atDinner = rank(DISHES, ctx({ slot: 'dinner' })).findIndex(d => d.dishId === 'poha')
+    expect(atDinner).toBeGreaterThan(atBreakfast)
+    // Still on the list. People do eat poha at night.
+    expect(rank(DISHES, ctx({ slot: 'dinner' })).some(d => d.dishId === 'poha')).toBe(true)
+  })
+
+  it('lets an ingredient ask and an ingredient refusal both land', () => {
+    let state = emptyRequest()
+    state = applyConstraint(state, {
+      id: 'a', dimension: 'ingredient', value: 'paneer', raw: 'use up the paneer',
+      strength: 'preference', statedAt: NOW, active: true,
+    }).state
+    // Ruling out onions must not retract the paneer: they are two statements.
+    state = applyConstraint(state, {
+      id: 'b', dimension: 'ingredient', value: '-onion', raw: 'no onions',
+      strength: 'preference', statedAt: NOW, active: true,
+    }).state
+    expect(ingredientWishes(state)).toEqual({ paneer: 1, onion: -1 })
+
+    const wishes = ingredientWishes(state)
+    const before = rank(DISHES, ctx()).findIndex(d => d.dishId === 'palak-paneer')
+    const after = rank(DISHES, ctx({ ingredients: wishes })).findIndex(d => d.dishId === 'palak-paneer')
+    expect(after).toBeLessThan(before)
+  })
+
+  it('still names the contradiction when the same ingredient is reversed', () => {
+    let state = emptyRequest()
+    state = applyConstraint(state, {
+      id: 'a', dimension: 'ingredient', value: '-onion', raw: 'no onions',
+      strength: 'preference', statedAt: NOW, active: true,
+    }).state
+    const { conflict } = applyConstraint(state, {
+      id: 'b', dimension: 'ingredient', value: 'onion', raw: 'onions are fine actually',
+      strength: 'preference', statedAt: NOW, active: true,
+    })
+    expect(conflict?.note).toContain('no onions')
+  })
+})
+
+describe('a suggestion is read against the plan it sits under', () => {
+  const base = {
+    eating: DINERS, pantry: [], staples: STAPLES, lastServedAt: {},
+    trailingDays: Array.from({ length: 6 }, () => ({
+      calories: 1500, proteinG: 20, carbsG: 200, fatG: 40, fibreG: 20, estimatedFrom: 'llm' as const,
+    })),
+    targets: { dailyCalories: 2000, dailyProteinG: 60 },
+    now: NOW,
+  }
+
+  it('does not advise a dal underneath a dal', () => {
+    const withDal = validateDay(
+      [{ slot: 'dinner', dishes: [DISH_BY_ID['lauki-chana-dal']] }],
+      base
+    )
+    const finding = withDal.warnings.find(w => w.code === 'protein-run')
+    expect(finding).toBeDefined()
+    expect(finding!.suggestion).not.toMatch(/would close the gap/)
+    expect(finding!.suggestion).toMatch(/already goes some way/)
+  })
+
+  it('still advises one when nothing on the plan answers it', () => {
+    const without = validateDay([{ slot: 'dinner', dishes: [DISH_BY_ID['jeera-rice']] }], base)
+    expect(without.warnings.find(w => w.code === 'protein-run')!.suggestion).toMatch(
+      /would close the gap/
+    )
+  })
+})
+
+describe('a dish that cannot stand alone says so', () => {
+  it('objects to a dal with no carb beside it, and stops once there is one', () => {
+    const alone = breaches([DISH_BY_ID['lauki-chana-dal']], ASSOCIATIONS)
+    expect(alone.map(b => b.association.subject)).toContain('dal')
+
+    const withRoti = breaches([DISH_BY_ID['lauki-chana-dal'], DISH_BY_ID['roti']], ASSOCIATIONS)
+    expect(withRoti).toHaveLength(0)
+  })
+
+  it('leaves a one-pot dish alone, because it is already both halves', () => {
+    expect(breaches([DISH_BY_ID['khichdi']], ASSOCIATIONS)).toHaveLength(0)
   })
 })

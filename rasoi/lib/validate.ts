@@ -14,12 +14,20 @@ import { onHandSet, passesGates, shoppingCost } from './scoring'
 // there's an obvious one, because a menu silently swapped behind your back is a
 // menu you start second-guessing — and once you're second-guessing it, you're
 // back to planning by hand.
+//
+// A suggestion has to be read against the plan it is attached to. Advising a dal
+// on a day that already has a dal on it is worse than saying nothing: the
+// observation may be sound, but the remedy makes the whole finding look like it
+// was written without looking. So every suggestion below is checked against what
+// is actually planned, and withdrawn or reworded when the plan already answers
+// it. The observation always stays — it is the advice that has to earn its place.
 
 const DAY_MS = 86_400_000
 const REPEAT_WINDOW_DAYS = 5
 const HEAVY_FACETS = ['fried', 'heavy', 'rich', 'cheat-meal']
 const LIGHT_FACETS = ['light', 'easy-to-digest']
 const LOW_PROTEIN_RUN = 3
+const PROTEIN_FACET = 'protein-rich'
 
 export interface NutritionTargets {
   dailyCalories: number
@@ -75,7 +83,11 @@ export function validateDay(slots: DaySlot[], ctx: ValidationContext): Validatio
           code: 'gate',
           dishId: dish.id,
           message: `${dish.nameEn} at ${slotLabel(slot)} doesn't work for someone eating.`,
-          suggestion: 'Swap it, or add a fork so a portion comes out before the masala.',
+          // Telling someone to add a fork to a dish that has one reads as not
+          // having looked at the dish.
+          suggestion: dish.fork
+            ? 'Swap it — the fork it has is for someone else.'
+            : 'Swap it, or add a fork so a portion comes out before the masala.',
         })
       }
     }
@@ -138,10 +150,13 @@ export function validateDay(slots: DaySlot[], ctx: ValidationContext): Validatio
   // the unit.
   const heavySlots = ordered.filter(s => s.dishes.some(isHeavy))
   if (heavySlots.length > 1) {
+    // Offering to lighten a meal that was already eaten is an offer that cannot
+    // be taken up.
+    const later = heavySlots[heavySlots.length - 1]
     warnings.push({
       code: 'day-balance',
       message: `Rich at ${heavySlots.map(s => slotLabel(s.slot)).join(' and ')}.`,
-      suggestion: 'Want me to lighten the later one?',
+      suggestion: later.given ? undefined : 'Want me to lighten the later one?',
     })
   }
 
@@ -152,21 +167,35 @@ export function validateDay(slots: DaySlot[], ctx: ValidationContext): Validatio
     lunch.dishes.some(isHeavy) &&
     !dinner.dishes.some(d => d.facets.some(f => LIGHT_FACETS.includes(f)))
   ) {
-    warnings.push({
-      code: 'no-light-landing',
-      message: 'Heavy lunch with nothing light at dinner.',
-      suggestion: 'A dal-khichdi sort of dinner would land better.',
-    })
+    // An empty dinner is not a dinner with nothing light in it. Said the first
+    // way it is a complaint about a decision nobody has made yet.
+    warnings.push(
+      dinner.dishes.length
+        ? {
+            code: 'no-light-landing',
+            message: 'Heavy lunch with nothing light at dinner.',
+            suggestion: 'A dal-khichdi sort of dinner would land better.',
+          }
+        : {
+            code: 'no-light-landing',
+            message: 'Rich at lunch — worth landing dinner light.',
+          }
+    )
   }
 
   const todayProtein = allDishes.reduce((sum, d) => sum + d.nutrition.proteinG, 0)
   const recent = [...ctx.trailingDays.map(d => d.proteinG), todayProtein]
   const run = recent.slice(-LOW_PROTEIN_RUN)
   if (run.length === LOW_PROTEIN_RUN && run.every(p => p < ctx.targets.dailyProteinG)) {
+    // The run is about the trailing days and stands whatever is planned. The
+    // advice is not: recommending a dal beneath a dal reads as not having looked.
+    const answering = allDishes.find(d => d.facets.includes(PROTEIN_FACET))
     warnings.push({
       code: 'protein-run',
       message: `Protein under target ${LOW_PROTEIN_RUN} days running.`,
-      suggestion: 'A dal, paneer or egg dish would close the gap.',
+      suggestion: answering
+        ? `The ${answering.nameEn.toLowerCase()} today already goes some way.`
+        : 'A dal, paneer or egg dish would close the gap.',
     })
   }
 

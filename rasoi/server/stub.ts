@@ -34,6 +34,23 @@ const PANTRY_WORDS = [
 ]
 
 const HAVE = /\b(lying|lots of|a lot of|loads|plenty|have|got|left over|leftover|spare|fridge|rakha|bahut|pada)\b/
+const RULING_OUT = /\b(no|without|skip|avoid|leave out|don'?t want|nahi)\b/
+
+// Everything the stub can ask back. Held as exact strings so it can tell whether
+// it has already asked, without needing anywhere to write that down.
+const CLARIFIERS = [
+  'Cook around him, or set his portion aside?',
+  'Cook around her, or set her portion aside?',
+  'One pot, or is there time for two things?',
+  'Just dinner, or shall I do the rest of the day too?',
+]
+
+function clarifierFor(text: string): string {
+  if (/\b(krishna|his food|off his|for him)\b/.test(text)) return CLARIFIERS[0]
+  if (/\b(shruti|her food|off her|for her)\b/.test(text)) return CLARIFIERS[1]
+  if (/\b(late|no time|rushed|jaldi)\b/.test(text)) return CLARIFIERS[2]
+  return CLARIFIERS[3]
+}
 
 const AGREE = /\b(that'?s fine|thats fine|fine|ok|okay|yes|yeah|yep|sure|go ahead|do it|perfect|haan|han|theek|send it|send)\b/
 const REFUSE = /\b(no|nah|not that|something else|change it|instead)\b/
@@ -60,16 +77,23 @@ function isQuestion(text: string): boolean {
   return text.trim().endsWith('?') || /^(what|why|how|which|who|is|are|can|could|does)\b/.test(text)
 }
 
+// The objects are already in the order a person would reach for them, so walk
+// those first and the candidates second. Taking the highest-ranked match instead
+// answers a dal with a khichdi, which is two dals and a rice.
 function pick(candidates: Candidate[], objects: string[]): Candidate | undefined {
-  return candidates.find(c => {
+  const matches = (c: Candidate, o: string) => {
     const dish = DISH_BY_ID[c.dishId]
-    return objects.some(
-      o =>
-        dish.id.includes(o) ||
-        dish.nameEn.toLowerCase().includes(o) ||
-        dish.ingredients.some(i => i.item.toLowerCase().includes(o))
+    return (
+      dish.id.includes(o) ||
+      dish.nameEn.toLowerCase().includes(o) ||
+      dish.ingredients.some(i => i.item.toLowerCase().includes(o))
     )
-  })
+  }
+  for (const object of objects) {
+    const found = candidates.find(c => matches(c, object))
+    if (found) return found
+  }
+  return undefined
 }
 
 function list(names: string[]): string {
@@ -144,42 +168,74 @@ export async function converseStubbed(
     })
   }
 
-  if (HAVE.test(text)) {
-    for (const word of PANTRY_WORDS) {
-      if (text.includes(word)) {
-        turn.notePantry({
-          item: word === 'aloo' ? 'potato' : word === 'dahi' ? 'curd' : word,
-          quantitySignal: /\b(lots|a lot|loads|plenty|bahut)\b/.test(text) ? 'a lot' : 'some',
-          raw: userText,
-        })
-      }
+  for (const word of PANTRY_WORDS) {
+    const at = text.indexOf(word)
+    if (at < 0) continue
+    const item = word === 'aloo' ? 'potato' : word === 'dahi' ? 'curd' : word
+    const before = text.slice(Math.max(0, at - 18), at)
+
+    if (RULING_OUT.test(before)) {
+      // A minus in front is the whole of the negation, so this collides with a
+      // later "actually onions are fine" and nothing else.
+      turn.stateConstraint({
+        dimension: 'ingredient',
+        value: `-${item}`,
+        raw: userText,
+        strength: 'preference',
+      })
+    } else if (HAVE.test(text)) {
+      turn.notePantry({
+        item,
+        quantitySignal: /\b(lots|a lot|loads|plenty|bahut)\b/.test(text) ? 'a lot' : 'some',
+        raw: userText,
+      })
+    } else {
+      turn.stateConstraint({
+        dimension: 'ingredient',
+        value: item,
+        raw: userText,
+        strength: 'preference',
+      })
     }
+  }
+
+  // Ask before proposing, once, at the top of a session. The whole point of this
+  // thing is that it talks back, and a stub that goes straight to an answer
+  // cannot be used to check the one behaviour that matters most.
+  const alreadyAsked = turn.current.turns.some(
+    t => t.role === 'assistant' && CLARIFIERS.includes(t.text)
+  )
+  if (!hasPlan && !alreadyAsked) {
+    await say(clarifierFor(text))
+    return turn.finish()
   }
 
   const slot = detectSlot(text, turn.current)
   const { candidates } = turn.shortlist(slot)
-  // The ranker does not know which meal it is ranking for — nothing in the
-  // scoring model carries a slot — so upma and chilla come back as eligible at
-  // dinner as anything else. Choosing is the chooser's job, and this is the
-  // chooser, so it happens here rather than by quietly reweighting the ranking.
-  const fitting = candidates.filter(
-    c => !(slot !== 'breakfast' && c.facets.includes('breakfast-ish'))
-  )
-  const usable = fitting.length ? fitting : candidates
-  if (!usable.length) {
+  if (!candidates.length) {
     await say('Nothing I can put here — everything is either just cooked or ruled out.')
     return turn.finish()
   }
 
-  const main = usable[0]
+  // "Around him" is a request for one pot rather than two, so a dish that forks
+  // is the answer to it.
+  const onePot = turn.current.turns.some(
+    t => t.role === 'user' && /\baround\b/.test(t.text.toLowerCase())
+  )
+  const forking = onePot ? candidates.filter(c => DISH_BY_ID[c.dishId].fork) : []
+  const main = forking[0] ?? candidates[0]
+
   let chosen = [main.dishId]
   let applied = turn.setPlan(slot, chosen)
 
-  // Rice with nothing wet beside it is the sort of thing the association layer
-  // exists to catch. Fix it and say so, rather than only reporting it.
+  // A dal on its own is as incomplete as rice on its own. Fix it and say so,
+  // rather than only reporting it.
   let added: string | null = null
   if (applied.ok && applied.breaches.length) {
-    const side = pick(usable, applied.breaches[0].objects)
+    // Ask for the gap specifically, or the answer is never on the list.
+    const objects = applied.breaches[0].objects
+    const { candidates: sides } = turn.shortlist(slot, objects)
+    const side = pick(sides, objects)
     if (side) {
       chosen = [...chosen, side.dishId]
       const retry = turn.setPlan(slot, chosen)
@@ -195,14 +251,16 @@ export async function converseStubbed(
     return turn.finish()
   }
 
-  const names = chosen.map(id => DISH_BY_ID[id].nameEn)
   const because = main.reasons[0] ?? 'it fits'
   const fork = DISH_BY_ID[main.dishId].fork
-  const alongside = added ? ` ${added} alongside.` : ''
   // The remark is already under the card. Saying it again is the machine
   // admiring its own work.
-  const extra = fork ? ` One pot — ${fork.instructionEn.replace(/^One pot — /, '')}` : alongside
-  await say(`${list(names)}, then — ${because}.${extra}`)
+  const extra = fork
+    ? ` One pot — ${fork.instructionEn.replace(/^One pot — /, '')}`
+    : added
+      ? ` With ${added.toLowerCase()} alongside — it wants something to go with it.`
+      : ''
+  await say(`${main.nameEn}, then — ${because}.${extra}`)
 
   return turn.finish()
 }

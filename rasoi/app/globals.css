@@ -16,7 +16,11 @@
   --sans: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
   --display: 'Bricolage Grotesque', 'IBM Plex Sans', system-ui, sans-serif;
   --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
-  --deva: 'Noto Sans Devanagari', 'IBM Plex Sans', system-ui, sans-serif;
+  /* IBM Plex Sans carries no Devanagari, so the fallbacks after it are the ones
+     that matter: if Google Fonts does not load, the card still has to be
+     readable by the person it is written for. */
+  --deva: 'Noto Sans Devanagari', 'Nirmala UI', 'Kohinoor Devanagari',
+    'Noto Sans', 'Devanagari MT', 'Mangal', system-ui, sans-serif;
 }
 
 * { box-sizing: border-box; }

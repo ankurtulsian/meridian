@@ -2,7 +2,10 @@ import { breaches } from '../lib/associations'
 import { buildCard, KitchenCard } from '../lib/card'
 import { dayFlavour } from '../lib/flavour'
 import { DISHES, DISH_BY_ID } from '../lib/library'
-import { activeConstraints, applyConstraint, Constraint, intentWeights } from '../lib/request'
+import {
+  activeConstraints, applyConstraint, Constraint, effortPressure, ingredientWishes,
+  intentWeights, itemOf, varietyPressure,
+} from '../lib/request'
 import { rank, ScoringContext } from '../lib/scoring'
 import { STAPLES } from '../lib/seed'
 import { DINERS } from '../lib/seed'
@@ -45,7 +48,7 @@ function dishesOf(items: MenuItem[]): Dish[] {
   return items.map(i => DISH_BY_ID[i.dishId]).filter(Boolean)
 }
 
-function scoringContext(state: AppState, now: number): ScoringContext {
+function scoringContext(state: AppState, now: number, slot?: MealSlot): ScoringContext {
   return {
     eating: dinersOf(state.eating),
     pantry: state.pantry,
@@ -53,6 +56,10 @@ function scoringContext(state: AppState, now: number): ScoringContext {
     outcomes: state.outcomes,
     lastServedAt: state.lastServedAt,
     intent: intentWeights(state.request),
+    ingredients: ingredientWishes(state.request),
+    slot,
+    effortPressure: effortPressure(state.request),
+    varietyPressure: varietyPressure(state.request),
     now,
   }
 }
@@ -91,6 +98,10 @@ export interface Candidate {
 
 const DAY_MS = 86_400_000
 
+function dishContains(dish: Dish, item: string): boolean {
+  return dish.ingredients.some(i => i.item.toLowerCase().includes(item.toLowerCase()))
+}
+
 function reasonsFor(
   dish: Dish,
   terms: Record<string, number>,
@@ -112,7 +123,12 @@ function reasonsFor(
   const matched = dish.facets.filter(f => asked[f])
   if (matched.length) forIt.push(`matches ${matched.join(', ')}`)
 
+  const wishes = ingredientWishes(state.request)
+  const wanted = Object.keys(wishes).filter(i => wishes[i] > 0 && dishContains(dish, i))
+  if (wanted.length) forIt.push(`has the ${wanted.join(' and ')}`)
+
   if (terms.shoppingCost === 0) forIt.push('nothing to buy')
+  else if (terms.shoppingCost > -0.6) forIt.push('a couple of things to buy')
   if (dish.effort <= 1) forIt.push('quick')
 
   const last = state.lastServedAt[dish.id]
@@ -120,9 +136,16 @@ function reasonsFor(
     const days = Math.floor((now - last) / DAY_MS)
     against.push(days === 0 ? 'made today' : `made ${days} day${days === 1 ? '' : 's'} ago`)
   }
+  const unwanted = Object.keys(wishes).filter(i => wishes[i] < 0 && dishContains(dish, i))
+  if (unwanted.length) against.push(`has ${unwanted.join(' and ')} in it`)
+
   if (terms.shoppingCost < -0.6) against.push('most of it needs buying')
   if (dish.effort >= 4) against.push('needs a free afternoon')
+  if (terms.slotFit < 0) against.push('more of a morning thing')
 
+  // An empty list reads as a dish nobody can account for. There is always
+  // something true to say, even if it is only that nothing is wrong with it.
+  if (!forIt.length && !against.length) return ['nothing against it']
   return [...forIt, ...against]
 }
 
@@ -184,7 +207,9 @@ export class PlanTurn {
     return {
       ok: true,
       conflict: conflict?.note,
-      active: activeConstraints(state).map(c => `${c.dimension}: ${c.value}`),
+      active: activeConstraints(state).map(
+        c => `${c.dimension}: ${c.value.startsWith('-') ? `no ${itemOf(c.value)}` : c.value}`
+      ),
     }
   }
 
@@ -213,11 +238,25 @@ export class PlanTurn {
     return { ok: true, pantry: this.state.pantry.map(p => `${p.item} (${p.quantitySignal})`) }
   }
 
-  shortlist(slot: MealSlot): { slot: MealSlot; candidates: Candidate[] } {
+  // `satisfying` narrows the field to dishes that would answer a particular gap —
+  // a carb beside a dal, something wet beside rice. Without it the plain staples
+  // are systematically invisible: roti matches no mood and is cooked constantly,
+  // so the ranker buries the very things that finish a meal.
+  shortlist(slot: MealSlot, satisfying?: string[]): { slot: MealSlot; candidates: Candidate[] } {
     const already = new Set(
       this.state.slots.find(s => s.slot === slot)?.items.map(i => i.dishId) ?? []
     )
-    const scored = rank(DISHES, scoringContext(this.state, this.now))
+    const field = satisfying?.length
+      ? DISHES.filter(d =>
+          satisfying.some(
+            o =>
+              d.id.includes(o) ||
+              d.nameEn.toLowerCase().includes(o) ||
+              d.ingredients.some(i => i.item.toLowerCase().includes(o))
+          )
+        )
+      : DISHES
+    const scored = rank(field, scoringContext(this.state, this.now, slot))
       .filter(s => !already.has(s.dishId))
       .slice(0, SHORTLIST_SIZE)
 
@@ -291,10 +330,10 @@ export class PlanTurn {
 
     const validation = validateDay(daySlots(this.state), validationContext(this.state, this.now))
     const { remark } = this.remark(validation)
-    const breached = breaches(
-      this.state.slots.flatMap(s => dishesOf(s.items)),
-      this.state.associations
-    )
+    // Beside, not somewhere else today. Run across the whole day, a bowl of rice
+    // at lunch quietly answers a dal at dinner and the check never fires — which
+    // is exactly how a single dish came to be proposed as a whole dinner.
+    const breached = breaches(items.map(i => DISH_BY_ID[i.dishId]).filter(Boolean), this.state.associations)
 
     return {
       ok: true,

@@ -591,6 +591,10 @@ export const DISH_BY_ID: Record<string, Dish> = Object.fromEntries(
 // What the system knows about food itself, as opposed to about this household.
 // 'general' means assumed rather than learned here — these get corrected or borne
 // out by what actually happens, which is how an assumption becomes theirs.
+// Named once so the sharing is visible rather than repeated five times and
+// quietly diverging.
+const CARBS = ['roti', 'rice', 'khichdi', 'paratha', 'idli', 'dosa']
+
 export const ASSOCIATIONS: Association[] = [
   {
     id: 'rice-needs-wet',
@@ -622,6 +626,24 @@ export const ASSOCIATIONS: Association[] = [
     observedCount: 0,
     updatedAt: ADDED,
   },
+  // The mirror of "rice cannot stand on its own". A dal or a sabzi on its own is
+  // the same mistake pointed the other way, and until these existed a single
+  // bowl of dal could be proposed as a whole dinner and nothing objected.
+  //
+  // These five rows share one object list, which is as close to a category as
+  // this should get. If a sixth thing needs adding, or the list starts wanting a
+  // name, that is the point to stop and ask rather than grow a taxonomy of meal
+  // roles by accident.
+  ...(['dal', 'chole', 'paneer', 'bhindi', 'baingan'] as const).map(subject => ({
+    id: `${subject}-needs-something-to-eat-it-with`,
+    kind: 'needs' as const,
+    subject,
+    objects: CARBS,
+    source: 'general' as const,
+    confidence: 0.85,
+    observedCount: 0,
+    updatedAt: ADDED,
+  })),
   {
     id: 'roti-stands-in-for-rice',
     kind: 'stands-in-for',

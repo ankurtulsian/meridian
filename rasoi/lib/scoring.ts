@@ -1,4 +1,4 @@
-import { Dish, Diner, Facet, PantryItem, PlateOutcome } from './types'
+import { Dish, Diner, Facet, MealSlot, PantryItem, PlateOutcome } from './types'
 
 // Ranking, not constraint solving.
 //
@@ -12,10 +12,18 @@ export const WEIGHTS = {
   useFirst: 3.0,
   shoppingCost: -1.2,
   intentMatch: 2.5,
+  ingredient: 2.0,
   recency: -2.0,
   preference: 1.5,
   effort: -0.4,
+  slotFit: -2.0,
 }
+
+// The only facet in the frozen vocabulary that carries a time of day. Poha at
+// dinner is not wrong — people do it — so this is a weight like everything else
+// and not a filter. If the vocabulary ever grows one that means "snack", it
+// belongs here beside it.
+const MORNING_FACET = 'breakfast-ish'
 
 const DAY_MS = 86_400_000
 const RECENCY_WINDOW_DAYS = 14
@@ -35,6 +43,16 @@ export interface ScoringContext {
   // Keyed by dish id. Null means never served.
   lastServedAt: Record<string, number | null>
   intent: Record<Facet, number>
+  // Ingredients asked for and ruled out, signed. Positive is wanted.
+  ingredients?: Record<string, number>
+  // Which meal is being ranked for. Optional because a caller ranking the whole
+  // library without a meal in mind is a legitimate thing to do — but a ranker
+  // that never knows will happily offer poha for dinner, and then the only thing
+  // standing between that and the plan is whoever is choosing.
+  slot?: MealSlot
+  // Multipliers on the effort and recency dials, set by what was asked for.
+  effortPressure?: number
+  varietyPressure?: number
   now: number
 }
 
@@ -115,6 +133,21 @@ export function preferenceScore(dish: Dish, ctx: ScoringContext): number {
   return total
 }
 
+// Wanted ingredients pull a dish up, ruled-out ones push it down, in proportion
+// to how firmly it was said.
+export function ingredientMatch(dish: Dish, wishes: Record<string, number>): number {
+  let score = 0
+  for (const [item, weight] of Object.entries(wishes)) {
+    if (dishContains(dish, item)) score += weight
+  }
+  return score
+}
+
+export function slotMisfit(dish: Dish, slot: MealSlot | undefined): number {
+  if (!slot || slot === 'breakfast') return 0
+  return dish.facets.includes(MORNING_FACET) ? 1 : 0
+}
+
 export function intentMatch(dish: Dish, intent: Record<Facet, number>): number {
   const asked = Object.keys(intent)
   if (!asked.length) return 0
@@ -136,9 +169,14 @@ export function scoreDish(dish: Dish, ctx: ScoringContext): DishScore {
     useFirst: WEIGHTS.useFirst * useFirstBonus(dish, ctx.pantry),
     shoppingCost: WEIGHTS.shoppingCost * shoppingCost(dish, onHandSet(ctx.staples, ctx.pantry)),
     intentMatch: WEIGHTS.intentMatch * intentMatch(dish, ctx.intent),
-    recency: WEIGHTS.recency * recencyPenalty(ctx.lastServedAt[dish.id] ?? null, ctx.now),
+    ingredient: WEIGHTS.ingredient * ingredientMatch(dish, ctx.ingredients ?? {}),
+    recency:
+      WEIGHTS.recency *
+      recencyPenalty(ctx.lastServedAt[dish.id] ?? null, ctx.now) *
+      (ctx.varietyPressure ?? 1),
     preference: WEIGHTS.preference * preferenceScore(dish, ctx),
-    effort: WEIGHTS.effort * (dish.effort - 1),
+    effort: WEIGHTS.effort * (dish.effort - 1) * (ctx.effortPressure ?? 1),
+    slotFit: WEIGHTS.slotFit * slotMisfit(dish, ctx.slot),
   }
   const score = Object.values(terms).reduce((a, b) => a + b, 0)
   return { dishId: dish.id, score, terms }
