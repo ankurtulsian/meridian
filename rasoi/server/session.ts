@@ -1,5 +1,6 @@
 import { Association } from '../lib/associations'
 import { emptyRequest } from '../lib/request'
+import { ZONE } from '../lib/seed'
 import { DinerId, EditEvent, MealSlot, MenuItem, Nutrition, PantryItem, PlateOutcome } from '../lib/types'
 import { RequestState } from '../lib/request'
 import { SLOT_ORDER, Stage, Turn } from '../lib/view'
@@ -36,8 +37,10 @@ export interface AppState {
   edits: EditEvent[]
 }
 
+// en-CA is the locale that formats as YYYY-MM-DD, which is the shape every date
+// column and every date string in this codebase already uses.
 export function isoDate(t: number): string {
-  return new Date(t).toISOString().slice(0, 10)
+  return new Intl.DateTimeFormat('en-CA', { timeZone: ZONE }).format(new Date(t))
 }
 
 // A day nobody has said anything about yet.

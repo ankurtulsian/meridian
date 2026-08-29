@@ -1,5 +1,5 @@
 import { DISHES, FACETS } from '../lib/library'
-import { DINERS } from '../lib/seed'
+import { DINERS, ZONE } from '../lib/seed'
 import { AppState } from './session'
 import { DISH_BY_ID } from '../lib/library'
 import { activeConstraints, itemOf } from '../lib/request'
@@ -84,7 +84,10 @@ export function stateBlock(state: AppState, now: Date): string {
   return [
     `Current state — read it, do not repeat it back.`,
     ``,
-    `Today is ${now.toLocaleDateString('en-IN', { weekday: 'long' })}, ${now.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' })}.`,
+    // The server runs in UTC; the kitchen does not. Telling the model it is
+    // Tuesday afternoon when it is Wednesday evening there is a quiet way to make
+    // every time-of-day judgement wrong.
+    `Today is ${now.toLocaleDateString('en-IN', { weekday: 'long', timeZone: ZONE })}, ${now.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', timeZone: ZONE })}.`,
     `Eating: ${state.eating.join(', ')}.`,
     ``,
     `The day so far:`,

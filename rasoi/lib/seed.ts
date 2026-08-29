@@ -35,3 +35,12 @@ export const STAPLES = new Set([
   'oil', 'ghee', 'salt', 'sugar', 'haldi', 'jeera', 'dhania', 'garam masala',
   'mustard seeds', 'hing', 'curd', 'milk',
 ])
+
+// The kitchen is in Delhi, and a day is a day there.
+//
+// This matters more now that days are the unit history is bucketed into. Deriving
+// the date from UTC means that between midnight and half past five in the
+// morning, Indian time, the app is still filing everything under yesterday — so a
+// late dinner lands on the wrong day, the rotation clock reads a day short, and
+// the Hindi card is headed with the wrong weekday.
+export const ZONE = 'Asia/Kolkata'

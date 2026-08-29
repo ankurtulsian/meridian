@@ -5,6 +5,7 @@ import { DISH_BY_ID } from '../../lib/library'
 import { Db, ensureSchema, redact, resetSchemaMemo, Row } from '../db'
 import { PlanTurn } from '../planner'
 import { SCHEMA } from '../schema'
+import { isoDate } from '../session'
 import { createStore } from '../store'
 import { converseStubbed } from '../stub'
 
@@ -353,5 +354,14 @@ describe('when there is nowhere to keep anything', () => {
       if (saved) process.env.DATABASE_URL = saved
       if (savedDirect) process.env.DATABASE_URL_UNPOOLED = savedDirect
     }
+  })
+})
+
+describe('a day is a day in the kitchen', () => {
+  it('files half past midnight in Delhi under that morning, not the day before', () => {
+    // 19:30 UTC is 01:00 the next day in Delhi. Bucketing history by UTC would
+    // put a late dinner on yesterday and read the rotation clock a day short.
+    const lateEvening = Date.parse('2026-09-10T19:30:00Z')
+    expect(isoDate(lateEvening)).toBe('2026-09-11')
   })
 })
