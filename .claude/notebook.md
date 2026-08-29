@@ -7,20 +7,34 @@ move, not reconstructed at the end.
 
 ## Active thread
 
-**The thin slice — running, awaiting Ankur.** Exit criterion met: the whole path walks in a
-browser with no key. Checked by driving it, not by reading the agent's report — which is how
-three model bugs were found that reading would have missed. Open until Ankur has used it.
+**Deploy — blocked on a fresh session.** The app is built and checked; what remains is
+getting it onto Vercel so Ankur can use it on his phone.
 
-*(previous framing kept below for the record)*
+The five `WIP … unverified` commits are safe despite their titles: 43 tests pass, `tsc` is
+clean, and the build succeeds both with and without the environment variables, so a mistyped
+key gives a clear message rather than a crash. They are labelled that way because they were
+committed mid-run for durability, before checking. This line is the check.
 
-**The thin slice — building.** The first version that actually runs: talk, get a day back,
-argue with it, agree, see the Hindi card. Exit criterion: `npm run dev` starts and that
-whole path can be walked without a key, with correct Devanagari and no console errors.
-Delegated; Claude checks by running it, not by reading the report.
+**Where to pick up in the new session:**
 
-Deliberate deviation, owned by Claude: no database yet. State goes to a JSON file behind a
-narrow interface. At slice stage there is no history worth keeping and a database would put
-a signup in front of the first run. Swapping it in later touches one file.
+1. Confirm Vercel is reachable — the old session was blocked by the egress policy and could
+   not see the change, since a session keeps whatever network settings it started with.
+2. Get a Vercel token from Ankur. Then create the project (**name it `rasoi`** — `meridian`
+   is taken by the archived restaurant app), root directory `rasoi`, set `ANTHROPIC_API_KEY`
+   and `DATABASE_URL`, deploy, hand him the link.
+3. `DATABASE_URL` is **not** in the repo — `.env.local` is git-ignored and the container is
+   gone. Ankur has the string; it goes into Vercel, not into the container.
+
+**What only Vercel can test.** Everything Neon-specific is unverified: the HTTP driver
+against the live service, TLS and channel-binding negotiation, whether `DATABASE_URL_UNPOOLED`
+exists in his project (without it, schema creation runs through the pooler — idempotent and
+single-transaction, so expected to be fine, but expected is not observed), and cold-start
+latency. The sandbox could not reach Neon, so PGlite carried the testing.
+
+**What day one honestly looks like.** An empty database means four dashes, "Nothing decided
+yet today", and no findings at all. Once a dinner is planned it says "Not enough history yet
+to say how this compares." That is worse than the fabricated fortnight it replaced, and it is
+the true one — it starts working on day four and gets teeth over the fortnight after.
 
 ## Parking lot
 
