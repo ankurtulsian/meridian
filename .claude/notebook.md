@@ -19,24 +19,29 @@ back in the canvas. Nothing else starts until this closes or Ankur redirects.
 | 0a | Put Rasoi in its own folder | 28 Aug | Done — **out of order** | Should have been logged and left until the screens closed. Worked immediately instead, on Claude's own judgment. |
 | 0b | Archive Meridian, keep the repo name | 28 Aug | Done — **out of order** | Same. Two thread switches inside one turn, neither of them asked for. |
 | 1 | Separate repo for Rasoi | 28 Aug | Settled for now | Ankur asked for a folder; `rasoi/` now holds everything and imports nothing from the restaurant app. A separate repo later is still a straight copy. |
-| 2 | A screen for the cook | 28 Aug | Blocked on Ankur | Undecided. Kept cheap: the Hindi card is generated from the plan, so a kitchen page, a WhatsApp send, or nothing are all swaps at the end. |
+| 2 | A screen for the cook | 28 Aug | Decide at build time | Undecided. Kept cheap: the Hindi card is generated from the plan, so a kitchen page, a WhatsApp send, or nothing are all swaps at the end. |
 | 3 | WhatsApp automation | 28 Aug | Parked | Needs a spare SIM and Meta verification. Copy-and-forward does the same job today. |
 | 4 | Inspire section | 28 Aug | Designed, not built | Ankur said "maybe". It's a view over data already stored, so it stays cheap either way. |
 | 5 | Recipe ingestion (YouTube, NYT, Instagram) | 28 Aug | Next after screens | Deliberately after, so a recipe record's shape is settled before building the thing that fills it. |
 | 6 | Database | 28 Aug | Next | Postgres from day one. History is the asset — losing it resets everything the system has learned. |
 | 7 | Integrations and services mapped | 28 Aug | Answered inline | Under $25/mo all-in, nearly all of it Claude. Offered to fold into the schema page; Ankur has not said either way. |
 | 8 | Should a menu follow a structure — a carb, something wet, something green | 28 Aug | Parked by Ankur | His words: figure out later. Nothing built for it; the generator stays unstructured until he says otherwise. |
-| 9 | What Krishna actually eats at dinner | 28 Aug | Blocked on Ankur | His food differs from theirs "quite a bit", so the two-menu design is right — but the mockup carries placeholders until the real dishes arrive. |
+| 9 | What Krishna actually eats at dinner | 28 Aug | Closed — not a question | His food varies like anyone's. Learned through use and decaying signals, never configured. Mockup placeholders stand until there is an app to fill them. |
 | 7 | Integrations and services mapped | 28 Aug | Answered inline | Under $25/mo all-in, nearly all of it Claude. Offered to fold into the schema page; Ankur has not said either way. |
 
 ## Blocked on Ankur
 
-| # | Needed | Why it matters |
-|---|---|---|
-| 1 | Which channels, creators and publications to follow | This list *is* the taste filter. Nothing sensible gets suggested without it. |
-| 2 | What Krishna genuinely won't eat, and any allergies | The only hard rules in the system. Everything else is a preference that bends. |
-| 3 | Whether the cook gets his own screen | Changes nothing upstream; only decides where the Hindi card is delivered. |
-| 4 | Twenty recorded sentences from him and Shruti, said naturally | The one genuinely uncertain piece. Speech recognition on mixed Hindi-English is the only part nobody can promise in advance; twenty real samples settle which service to use. |
+Nothing. Cleared 28 Aug.
+
+Three items sat here all session — the source list, Krishna's dishes, whether the
+cook gets a screen — and none of them blocked anything. Ankur's correction: the
+starting instructions arrive once there is an app to give them to. Asking for a
+fixed list of what Krishna eats was a category error anyway; his food varies as
+much as theirs, which is why the system is built to learn it through use rather
+than be told. Re-surfacing these was Claude making its own unreadiness look like
+a dependency on him.
+
+They return as **setup**, not as blockers, when the app can accept them.
 
 ## Blocked on others
 
