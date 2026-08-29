@@ -219,8 +219,10 @@ export async function converseStubbed(
 
   // "Around him" is a request for one pot rather than two, so a dish that forks
   // is the answer to it.
+  // "Cook around him", not "bhindi lying around". A bare \baround\b matched both
+  // and quietly turned a pantry note into a request for one pot.
   const onePot = turn.current.turns.some(
-    t => t.role === 'user' && /\baround\b/.test(t.text.toLowerCase())
+    t => t.role === 'user' && /\baround (him|her|them|krishna|shruti|ankur)\b/.test(t.text.toLowerCase())
   )
   const forking = onePot ? candidates.filter(c => DISH_BY_ID[c.dishId].fork) : []
   const main = forking[0] ?? candidates[0]

@@ -115,6 +115,9 @@ export function validateDay(slots: DaySlot[], ctx: ValidationContext): Validatio
   const seenToday = new Map<string, MealSlot>()
   for (const { slot, dishes } of ordered) {
     for (const dish of dishes) {
+      // Roti at lunch and again at dinner is not a repeat, it is lunch and
+      // dinner.
+      if (dish.everyday) continue
       const earlier = seenToday.get(dish.id)
       if (earlier) {
         warnings.push({
@@ -130,6 +133,10 @@ export function validateDay(slots: DaySlot[], ctx: ValidationContext): Validatio
   }
 
   for (const dish of planned.flatMap(s => s.dishes)) {
+    // Roti was made yesterday. So was chai. Saying so is true every day of the
+    // year, and two of these stacked under a plan is how someone learns to skip
+    // the findings entirely — at which point the ones that matter go unread.
+    if (dish.everyday) continue
     const last = ctx.lastServedAt[dish.id]
     // Null means never served; undefined means we have no record, which is not
     // the same thing — a day nobody planned through us leaves a real hole, and
@@ -141,7 +148,10 @@ export function validateDay(slots: DaySlot[], ctx: ValidationContext): Validatio
         code: 'repeat',
         dishId: dish.id,
         message: `${dish.nameEn} was made ${days === 0 ? 'today' : `${days} day${days === 1 ? '' : 's'} ago`}.`,
-        suggestion: 'Keep it if it went down well — otherwise reroll this one.',
+        // Nothing here knows whether it went down well — no outcome has ever been
+        // recorded — so the old advice to "keep it if it went down well" invited a
+        // judgement on evidence that does not exist. An offer claims nothing.
+        suggestion: 'Want something else instead?',
       })
     }
   }

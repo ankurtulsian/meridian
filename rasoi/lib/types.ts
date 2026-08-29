@@ -100,6 +100,20 @@ export interface Dish {
   nutrition: Nutrition
   // 1 = weeknight, 5 = needs a free afternoon. A dial, not a filter.
   effort: 1 | 2 | 3 | 4 | 5
+  // On the table most days, and nobody would remark on seeing it again tomorrow —
+  // roti, plain rice, chai, curd, papad. It is a fact about the dish's place in
+  // the rotation, not about its ingredients and not about its character, which is
+  // why it is neither a staple nor a facet: the staples list is keyed on what is
+  // in the cupboard (khichdi is made entirely of staples and is still worth
+  // rotating), and a facet would make it something the ranker matches intent
+  // against, which it is not.
+  //
+  // It licenses exactly one thing: not being told about. Saying "roti was made
+  // yesterday" is true every day of the year, and a warning that is always true
+  // teaches you to stop reading warnings — after which the ones that matter go
+  // unread too. Ranking is untouched; a dish can be unremarkable and still be the
+  // wrong thing to cook tonight.
+  everyday?: boolean
   servesWell: DinerId[]
   fork?: ForkInstruction
   // How it is actually made, in Hindi, in the cook's own units. The kitchen

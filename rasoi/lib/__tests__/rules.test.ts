@@ -224,3 +224,49 @@ describe('a dish that cannot stand alone says so', () => {
     expect(breaches([DISH_BY_ID['khichdi']], ASSOCIATIONS)).toHaveLength(0)
   })
 })
+
+describe('a warning that is always true is not a warning', () => {
+  const base = {
+    eating: DINERS, pantry: [], staples: STAPLES,
+    trailingDays: [], targets: { dailyCalories: 2000, dailyProteinG: 60 }, now: NOW,
+  }
+
+  it('says nothing about roti made yesterday', () => {
+    const result = validateDay(
+      [{ slot: 'dinner', dishes: [DISH_BY_ID['roti']] }],
+      { ...base, lastServedAt: { roti: NOW - DAY } }
+    )
+    expect(result.warnings.filter(w => w.code === 'repeat')).toHaveLength(0)
+  })
+
+  it('still says so about a dish that is not on the table every day', () => {
+    const result = validateDay(
+      [{ slot: 'dinner', dishes: [DISH_BY_ID['dal-tadka']] }],
+      { ...base, lastServedAt: { 'dal-tadka': NOW - DAY } }
+    )
+    const repeat = result.warnings.find(w => w.code === 'repeat')
+    expect(repeat).toBeDefined()
+    // Nothing has ever recorded how a dish went down, so nothing may imply it has.
+    expect(repeat!.suggestion).not.toMatch(/went down|liked|enjoyed/)
+  })
+
+  it('does not call roti at lunch and again at dinner a repeat', () => {
+    const result = validateDay(
+      [
+        { slot: 'lunch', dishes: [DISH_BY_ID['roti'], DISH_BY_ID['dal-tadka']] },
+        { slot: 'dinner', dishes: [DISH_BY_ID['roti'], DISH_BY_ID['bhindi-masala']] },
+      ],
+      { ...base, lastServedAt: {} }
+    )
+    expect(result.warnings.filter(w => w.code === 'repeat-same-day')).toHaveLength(0)
+  })
+
+  it('the ranking still knows roti was made yesterday', () => {
+    // Being unremarkable is not the same as being the right thing to cook.
+    const fresh = rank(DISHES, ctx()).findIndex(d => d.dishId === 'roti')
+    const stale = rank(DISHES, ctx({ lastServedAt: { roti: NOW - DAY } })).findIndex(
+      d => d.dishId === 'roti'
+    )
+    expect(stale).toBeGreaterThan(fresh)
+  })
+})
