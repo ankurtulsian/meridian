@@ -3,33 +3,45 @@
 Live engagement record **for this project only**. Read at session start. Updated as threads
 move, not reconstructed at the end.
 
-**Last updated:** 2026-08-28
+**Last updated:** 2026-08-29
 
 ## Active thread
 
-**Deploy — blocked on a fresh session.** The app is built and checked; what remains is
-getting it onto Vercel so Ankur can use it on his phone.
+**Deploy — in progress, waiting on a Vercel token.**
 
-The five `WIP … unverified` commits are safe despite their titles: 43 tests pass, `tsc` is
-clean, and the build succeeds both with and without the environment variables, so a mistyped
-key gives a clear message rather than a crash. They are labelled that way because they were
-committed mid-run for durability, before checking. This line is the check.
+*Exit criterion:* a live URL Ankur opens on his phone, serving Rasoi from `rasoi/`, with the
+Anthropic key and the Neon string held in Vercel rather than in the repository.
 
-**Where to pick up in the new session:**
+**Cleared 29 Aug — the old blocker is gone.** The previous session could not reach Vercel and
+handed that over as the first thing to re-check. It is reachable from this session:
+`api.vercel.com` answers, and the 403 it returns is Vercel's own "missing authentication
+token", not the egress policy. The proxy records no blocked requests.
 
-1. Confirm Vercel is reachable — the old session was blocked by the egress policy and could
-   not see the change, since a session keeps whatever network settings it started with.
-2. Get a Vercel token from Ankur. Then create the project (**name it `rasoi`** — `meridian`
-   is taken by the archived restaurant app), root directory `rasoi`, set `ANTHROPIC_API_KEY`
-   and `DATABASE_URL`, deploy, hand him the link.
-3. `DATABASE_URL` is **not** in the repo — `.env.local` is git-ignored and the container is
-   gone. Ankur has the string; it goes into Vercel, not into the container.
+**Still blocked, and it is different from what was expected.** This container cannot reach the
+npm registry — a flat 403 on every package, the `vercel` CLI included — so the CLI route the
+handoff assumed is unavailable, and the app cannot be built or type-checked here either.
+Neither matters for the deploy: `scripts/deploy.sh` drives the same steps over the REST API
+with curl, and Vercel's own builders install the dependencies. It does mean the first real
+build of this code happens on Vercel.
 
-**What only Vercel can test.** Everything Neon-specific is unverified: the HTTP driver
-against the live service, TLS and channel-binding negotiation, whether `DATABASE_URL_UNPOOLED`
-exists in his project (without it, schema creation runs through the pooler — idempotent and
-single-transaction, so expected to be fine, but expected is not observed), and cold-start
-latency. The sandbox could not reach Neon, so PGlite carried the testing.
+**Decided with Ankur, 29 Aug.**
+- He supplies a Vercel token and Claude runs the deploy, rather than clicking it through
+  himself. Shortest expiry; deleted once the deploy is done.
+- Rasoi becomes the repository's main version, so later changes deploy on their own.
+
+**Where it stands.** `rasoi/scripts/deploy.sh` and `rasoi/DEPLOY.md` are written and the
+branch is ready to become `main`. Outstanding: the token, the Neon string, the Anthropic key
+— and folding this branch into `main`, since Vercel pointed at this repository's main line
+would otherwise find only the archived restaurant app.
+
+**Checked while preparing.** `@electric-sql/pglite` is a development-only dependency and is
+imported by tests alone; the production path goes through `neonDb()`. Nothing in the app
+would fail a Vercel build for that reason.
+
+**What only Vercel can test.** Unchanged from the handoff: the Neon HTTP driver against the
+live service, TLS and channel-binding negotiation, whether `DATABASE_URL_UNPOOLED` exists in
+his project, and cold-start latency. The sandbox could not reach Neon, so PGlite carried the
+testing.
 
 **What day one honestly looks like.** An empty database means four dashes, "Nothing decided
 yet today", and no findings at all. Once a dinner is planned it says "Not enough history yet
@@ -56,7 +68,18 @@ the true one — it starts working on day four and gets teeth over the fortnight
 
 ## Blocked on Ankur
 
-Nothing. Cleared 28 Aug.
+1. **A Vercel token** — vercel.com → avatar → Settings → Tokens. Nothing deploys without it.
+2. **The Neon connection string** (`DATABASE_URL`). Not in the repository and the old
+   container is gone, so it has to come from him. Without it the app loads and then reports
+   the missing variable on every request.
+3. **The Anthropic key.** Without it the app runs on stub replies rather than real
+   conversation — usable, but not the real thing.
+
+*All three are one message. Nothing else is waiting on him.*
+
+---
+
+*Earlier: cleared 28 Aug.*
 
 Three items sat here all session — the source list, Krishna's dishes, whether the
 cook gets a screen — and none of them blocked anything. Ankur's correction: the
