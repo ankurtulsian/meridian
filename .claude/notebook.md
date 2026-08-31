@@ -78,8 +78,29 @@ records the deletion and supersedes 19 rather than rewriting it.
 
 ## Blocked on Ankur
 
-**Try Rasoi and say what happens.** https://rasoi-phi.vercel.app — the first real use is the
-only remaining test, and it cannot be run from here.
+**Confirmed working, 31 Aug.** Ankur has had several conversations with Rasoi. That is the
+first evidence the app runs end to end — every earlier report was "the build compiled",
+which is a far weaker claim and was repeatedly treated as a stronger one. The replaced
+Anthropic key works.
+
+**New thread — auditing the conversations.** Ankur's framing: the whole value is in the
+conversation and the intelligence of the voice, so he wants Claude able to read the sessions
+and help improve them.
+*Exit criterion:* Claude can read past conversations and give specific, evidenced feedback on
+the voice — not impressions.
+*What is already true:* nothing needs building. `days.turns` stores both sides of every
+conversation as jsonb, per day, and `days.request` keeps the constraints and what was said.
+Both `addTurn('user', …)` and `addTurn('assistant', …)` are written on every turn.
+*The blocker is access, not data.* `DATABASE_URL` is sensitive on Vercel and its value cannot
+be read back, so it has to come from Ankur. `psql` is installed here and `neon.tech` is
+reachable, so the string is sufficient.
+*Raised with him and not yet settled:* pasting it means a live database password in the chat,
+and it does not survive into the next session — he would re-paste every time, which is the
+exact failure the working style exists to prevent. The durable fix is adding Neon as a
+connector on his Claude account, done once, giving every future session query access. That
+cannot be set up from this container.
+*Claude got this wrong first:* asserted there was probably nothing to audit because no
+successful conversation was known of. That was an assumption stated as fact; he corrected it.
 
 **29 Aug — the first real request failed, and it should not have been Ankur who found out.**
 Nothing in this project had ever run. The build compiling was reported accurately, but it was
