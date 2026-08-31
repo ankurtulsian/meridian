@@ -160,6 +160,25 @@ export function hasApiKey(): boolean {
   return Boolean(process.env.ANTHROPIC_API_KEY)
 }
 
+// An Anthropic key is either scoped to a workspace or linked to a person. The
+// second kind refuses to act until it is told which workspace it is acting in,
+// and says so in a 400 whose wording is Anthropic's rather than ours. Left
+// alone it reaches the screen as raw JSON, which tells the person who typed the
+// variable nothing about which variable or where.
+export class WorkspaceNotChosen extends Error {
+  constructor() {
+    super(
+      'The Anthropic key is linked to a person rather than to a workspace, so it ' +
+        'will not run until it is told which workspace to work in. Either way ' +
+        'fixes it: on console.anthropic.com create a normal workspace key and ' +
+        'replace ANTHROPIC_API_KEY with it, or keep this key and add ' +
+        'ANTHROPIC_WORKSPACE_ID with the workspace id. On Vercel: Settings → ' +
+        'Environment Variables, then redeploy.'
+    )
+    this.name = 'WorkspaceNotChosen'
+  }
+}
+
 export async function converse(
   state: AppState,
   userText: string,
@@ -206,6 +225,12 @@ export async function converse(
         messages = buildMessages(state, userText, new Date(now), false)
         i--
         continue
+      }
+      if (
+        error instanceof Anthropic.BadRequestError &&
+        /anthropic-workspace-id/i.test(error.message)
+      ) {
+        throw new WorkspaceNotChosen()
       }
       throw error
     }
