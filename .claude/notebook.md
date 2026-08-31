@@ -78,7 +78,7 @@ records the deletion and supersedes 19 rather than rewriting it.
 
 ## Blocked on Ankur
 
-**One thing: open https://rasoi-phi.vercel.app and see it.** Nothing else needs him today.
+**Nothing.** Rasoi is live and open to the household.
 
 **29 Aug — four decisions were put to him at once and he said he was lost.** That is a
 process failure, not his. Everything below was raised as a live question when none of it was
@@ -93,10 +93,15 @@ only when they matter.
 
 *Parked with a decision made, to be re-raised when the trigger arrives:*
 
-2. **Vercel Authentication — left on.** The link works for Ankur today, which is all that is
-   needed. It blocks Shruti and the cook; that becomes live the day he wants them in, and it
-   is one API call to flip. Turning it off makes the URL itself the only access, since Rasoi
-   has no login of its own.
+2. ~~**Vercel Authentication**~~ — **closed 29 Aug. Turned off, at Ankur's request, to bring
+   Shruti in.** Verified off by reading the setting back fresh. The team is on Vercel's Hobby
+   plan, which cannot add members at all, so inviting her would have meant upgrading to Pro at
+   roughly $20/month — the alternative was not free, and was not worth it for one person.
+   The consequence, stated to him: the URL is now the only access, so anyone holding it can
+   use Rasoi and spend his Anthropic credit. Mitigation suggested — a spend cap on the
+   Anthropic key, which converts that exposure from an open-ended bill into a stopped app.
+   Not verified from here: `*.vercel.app` is blocked by this container's egress policy, so
+   the public page has never been fetched. Shruti opening it is the real test.
 3. **Fold the branch into `main` — held.** He approved it and both builds are green, so it is
    ready whenever. Nothing breaks by waiting.
 4. **The Google Maps key.** Still live in his Google Cloud account and still in this
@@ -206,6 +211,7 @@ this branch's. Having the text in context was treated as equivalent to following
 | 36 | Staples are exempt from repeat warnings, not from ranking | 28 Aug | Roti is made daily; warning about it trains you to ignore findings. It still sinks in the ranking. |
 | 37 | A dish's place in the rotation is its own property | 28 Aug | Not its ingredients — khichdi is made entirely of staples and is still worth rotating. |
 | 38 | Ranking orders the field; it never shortens it | 28 Aug | Ankur's worry about invented weights. A wrong weight should cost sort order, not silently remove half the library from consideration. |
+| 40 | The link is the access; no login of Rasoi's own | 29 Aug | Ankur's call, to bring Shruti in. Vercel's login was the only gate and it cannot admit anyone outside a paid team. Rasoi has no accounts of its own and does not need them for a household of three — the unguessable URL is the credential. Cost control moves to a spend cap on the Anthropic key rather than to access control. |
 | 39 | The restaurant app deleted outright, superseding 19 | 29 Aug | Ankur's call. Archiving still left a dead Next.js app, its dependencies and its config sitting at the repository root, where a build tool or a reader meets it first. The repository keeps the name `meridian`, so nothing Ankur has cloned or bookmarked changes. |
 | 24 | Inspire is spoken, not a screen | 28 Aug | "Inspire me" is something you say. Third instance of the same error, so the rule is now explicit: if it can be spoken, it is not a screen. |
 | 25 | Voice is two-way; agreement is spoken | 28 Aug | The system asks questions and pushes back. Nothing is settled until Ankur says so out loud, prompted by it asking whether to send. |
