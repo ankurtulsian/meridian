@@ -78,15 +78,31 @@ records the deletion and supersedes 19 rather than rewriting it.
 
 ## Blocked on Ankur
 
-1. **Vercel Authentication — on or off.** Until this is decided the link only works for him.
-   Off means anyone holding the URL can use Rasoi and spend his Anthropic credit; on means
-   everyone who needs it must be added to his Vercel team.
-2. **The Google Maps key.** Deleting the restaurant app did not revoke it. Still live in his
-   Google Cloud account, still in this repository's history. Only he can revoke it.
-3. **Revoke the deploy token** at vercel.com/account/settings/tokens once he is happy — it
-   passed through the chat and is no longer needed.
-4. **The old `meridian` Vercel project** still exists in his account, now pointing at a
-   repository with no restaurant app in it. Worth deleting; his call.
+**One thing: open https://rasoi-phi.vercel.app and see it.** Nothing else needs him today.
+
+**29 Aug — four decisions were put to him at once and he said he was lost.** That is a
+process failure, not his. Everything below was raised as a live question when none of it was
+urgent; the objective is that his working memory is never the bottleneck, and queuing four
+open decisions did the opposite. All four are now parked with a call made, so they return
+only when they matter.
+
+*Optional, whenever he likes:*
+
+1. **Revoke the deploy token** at vercel.com/account/settings/tokens. It passed through the
+   chat and is no longer needed. The only item with any real reason to happen soon.
+
+*Parked with a decision made, to be re-raised when the trigger arrives:*
+
+2. **Vercel Authentication — left on.** The link works for Ankur today, which is all that is
+   needed. It blocks Shruti and the cook; that becomes live the day he wants them in, and it
+   is one API call to flip. Turning it off makes the URL itself the only access, since Rasoi
+   has no login of its own.
+3. **Fold the branch into `main` — held.** He approved it and both builds are green, so it is
+   ready whenever. Nothing breaks by waiting.
+4. **The Google Maps key.** Still live in his Google Cloud account and still in this
+   repository's history. The app it belonged to is deleted and running nowhere, so the
+   exposure is dormant. Only he can revoke it.
+5. **The old `meridian` Vercel project** still exists. Cosmetic.
 
 *Cleared: the Neon string and the Anthropic key were never actually needed — both were
 already on the Vercel project.*
