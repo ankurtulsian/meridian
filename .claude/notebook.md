@@ -78,7 +78,26 @@ records the deletion and supersedes 19 rather than rewriting it.
 
 ## Blocked on Ankur
 
-**Nothing.** Rasoi is live and open to the household.
+**Try Rasoi and say what happens.** https://rasoi-phi.vercel.app — the first real use is the
+only remaining test, and it cannot be run from here.
+
+**29 Aug — the first real request failed, and it should not have been Ankur who found out.**
+Nothing in this project had ever run. The build compiling was reported accurately, but it was
+treated as though it meant more than it did: npm is blocked so nothing could be type-checked
+or run, `*.vercel.app` is blocked so the page could never be opened, and every earlier test
+ran against PGlite and a stubbed model. The first genuine call to Anthropic happened when
+Ankur tapped the app, and it returned a raw 400 to his screen.
+
+Two separate faults, worth keeping apart:
+- *The key.* It was identity-linked — tied to him rather than to a workspace — and that kind
+  refuses to act until told which workspace it is acting in. Replaced 31 Aug and redeployed.
+- *The handling.* Anthropic's 400 reached the screen as JSON. Now translated into a sentence
+  naming the variable and where to change it, in the same register as `MissingDatabaseUrl`.
+
+Also learned, and the cause of one wasted round trip: **a Vercel environment variable does
+nothing until the project is redeployed** — the value is bound at build time. And setting a
+key in Anthropic's console is not setting it in Vercel; the first time, it never left the
+console.
 
 **29 Aug — four decisions were put to him at once and he said he was lost.** That is a
 process failure, not his. Everything below was raised as a live question when none of it was
