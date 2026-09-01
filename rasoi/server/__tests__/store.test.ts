@@ -358,10 +358,10 @@ describe('when there is nowhere to keep anything', () => {
 })
 
 describe('a day is a day in the kitchen', () => {
-  it('files half past midnight in Delhi under that morning, not the day before', () => {
-    // 19:30 UTC is 01:00 the next day in Delhi. Bucketing history by UTC would
+  it('files half past midnight in Dubai under that morning, not the day before', () => {
+    // 21:30 UTC is 01:30 the next day in Dubai. Bucketing history by UTC would
     // put a late dinner on yesterday and read the rotation clock a day short.
-    const lateEvening = Date.parse('2026-09-10T19:30:00Z')
+    const lateEvening = Date.parse('2026-09-10T21:30:00Z')
     expect(isoDate(lateEvening)).toBe('2026-09-11')
   })
 })

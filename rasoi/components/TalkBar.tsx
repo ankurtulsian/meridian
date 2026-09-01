@@ -105,7 +105,9 @@ export function TalkBar({
     setVoiceError(null)
     finalRef.current = ''
     const engine = new Ctor()
-    engine.lang = 'en-IN'
+    // The household is Indian and the dish names are Hindi either way; what changes
+    // with the locale is the accent model, and they are in Dubai.
+    engine.lang = 'en-AE'
     engine.continuous = false
     engine.interimResults = true
     engine.onresult = event => {

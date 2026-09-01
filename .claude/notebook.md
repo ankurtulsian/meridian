@@ -67,7 +67,7 @@ for a later session to check it against.
 | Fact | Source | Confidence |
 |---|---|---|
 | Lives in **Dubai** | Said it directly, 31 Aug, correcting Rasoi | Stated by Ankur |
-| Whether the **kitchen** is in Dubai too — the cook, Shruti, Krishna | Not asked | **Unknown.** Decides when the day rolls over; do not guess it |
+| The **kitchen** is in Dubai too — cook, Shruti, Krishna | Said it directly, 31 Aug | Stated by Ankur |
 | Household is Ankur, Shruti and their son Krishna | Throughout | Stated by Ankur |
 | Cook reads and speaks Hindi | Throughout | Stated by Ankur |
 | Works in the browser only; no local machine | Decision D12 | Stated by Ankur |
@@ -282,6 +282,7 @@ this branch's. Having the text in context was treated as equivalent to following
 | 36 | Staples are exempt from repeat warnings, not from ranking | 28 Aug | Roti is made daily; warning about it trains you to ignore findings. It still sinks in the ranking. |
 | 37 | A dish's place in the rotation is its own property | 28 Aug | Not its ingredients — khichdi is made entirely of staples and is still worth rotating. |
 | 38 | Ranking orders the field; it never shortens it | 28 Aug | Ankur's worry about invented weights. A wrong weight should cost sort order, not silently remove half the library from consideration. |
+| 41 | The kitchen is in Dubai; Asia/Dubai is the default, not the truth | 31 Aug | Ankur's answer, asked because Delhi had been invented and nobody could check it. The default in `seed.ts` moves to Asia/Dubai, but the live value lives in the settings table and is changed by telling Rasoi — so the next time it is wrong, it is fixed in the app rather than in a constant nobody thinks to look at. |
 | 40 | The link is the access; no login of Rasoi's own | 29 Aug | Ankur's call, to bring Shruti in. Vercel's login was the only gate and it cannot admit anyone outside a paid team. Rasoi has no accounts of its own and does not need them for a household of three — the unguessable URL is the credential. Cost control moves to a spend cap on the Anthropic key rather than to access control. |
 | 39 | The restaurant app deleted outright, superseding 19 | 29 Aug | Ankur's call. Archiving still left a dead Next.js app, its dependencies and its config sitting at the repository root, where a build tool or a reader meets it first. The repository keeps the name `meridian`, so nothing Ankur has cloned or bookmarked changes. |
 | 24 | Inspire is spoken, not a screen | 28 Aug | "Inspire me" is something you say. Third instance of the same error, so the rule is now explicit: if it can be spoken, it is not a screen. |
