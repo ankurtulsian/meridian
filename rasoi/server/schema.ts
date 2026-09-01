@@ -80,6 +80,41 @@ export const SCHEMA = [
    )`,
   `create index if not exists edit_events_at_idx on edit_events (happened_at desc)`,
 
+  // One row per setting, and there are very few. This exists for the handful of
+  // facts the *code* has to act on rather than merely tell the model about — the
+  // timezone being the whole reason it exists. A standing note saying "we are in
+  // Dubai" is something the model reads; it cannot make `isoDate` bucket the day
+  // correctly. That needs a value, not a sentence.
+  `create table if not exists settings (
+     key        text primary key,
+     value      text not null,
+     updated_at timestamptz not null default now()
+   )`,
+
+  // Things said once that have to hold afterwards — where they are, what not to
+  // assume, how to talk to them.
+  //
+  // Deliberately not a jsonb blob on the day row: a standing note is the one kind
+  // of memory whose whole job is to outlive the day it was said on, and the day
+  // row is scoped to a date. It is also the table most likely to be read by a
+  // person wondering why the app believes something, which is a reason to keep it
+  // as rows rather than inside a document.
+  `create table if not exists standing_notes (
+     id               text primary key,
+     kind             text not null,
+     -- Named `note` rather than `text`: a column called text, of type text, is
+     -- legal and reads badly everywhere it appears in a query.
+     note             text not null,
+     raw              text not null,
+     created_at       timestamptz not null default now(),
+     last_affirmed_at timestamptz not null default now(),
+     affirmed_count   int not null default 1,
+     retired_at       timestamptz
+   )`,
+  // Retired notes stay as rows so that "you used to say X" is answerable, but
+  // every read filters them out.
+  `create index if not exists standing_notes_live_idx on standing_notes (retired_at) where retired_at is null`,
+
   // What the household turns out to believe about food itself, as distinct from
   // the general assumptions the library ships with. Seeded from the library on
   // first boot and topped up on later boots, so a new assumption in code arrives

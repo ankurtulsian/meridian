@@ -40,6 +40,11 @@ const HINTS = [
   '“plan me the whole of sunday”',
 ]
 
+// Long enough to swallow a tap that lands just after the recogniser has already
+// sent the same words; short enough that deliberately repeating something short
+// ("yes", "no onions") still goes through.
+const DUPLICATE_WINDOW_MS = 4000
+
 export function TalkBar({
   onSend,
   busy,
@@ -61,9 +66,31 @@ export function TalkBar({
     return () => recognition.current?.abort()
   }, [])
 
+  // `busy` is read through a ref, not the closure. The voice handlers below are
+  // built once, when listening starts, and they capture whatever `busy` was at
+  // that moment — so by the time `onend` fires the value they can see is stale and
+  // the guard is not guarding anything.
+  const busyRef = useRef(busy)
+  busyRef.current = busy
+
+  // Two paths can send the same utterance: the recogniser ending by itself, and
+  // the person tapping send because nothing appeared to happen. Both are
+  // reasonable; sending twice is not, and it is close to invisible when it
+  // happens. The day row is rewritten whole, so a duplicate turn leaves no mark
+  // on the transcript — it shows up only as a doubled row in the edit log, which
+  // is the signal habits are meant to be fitted to. Doubled evidence means rules
+  // forming on half the repetition they were designed to need.
+  const lastSent = useRef<{ text: string; at: number }>({ text: '', at: 0 })
+
   const submit = (value: string) => {
     const trimmed = value.trim()
-    if (!trimmed || busy) return
+    if (!trimmed || busyRef.current) return
+    const at = Date.now()
+    if (trimmed === lastSent.current.text && at - lastSent.current.at < DUPLICATE_WINDOW_MS) return
+    lastSent.current = { text: trimmed, at }
+    // Cleared here as well as on the next listen, so a second `onend` — which some
+    // engines fire after an abort — has nothing left to send.
+    finalRef.current = ''
     setText('')
     onSend(trimmed)
   }

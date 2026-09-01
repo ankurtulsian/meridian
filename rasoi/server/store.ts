@@ -1,7 +1,8 @@
 import { Association } from '../lib/associations'
 import { ASSOCIATIONS, DISH_BY_ID } from '../lib/library'
 import { currentPantry } from '../lib/pantry'
-import { MealSlot, MenuItem, Nutrition, PantryItem, PlateOutcome } from '../lib/types'
+import { MealSlot, MenuItem, Nutrition, PantryItem, PlateOutcome, StandingNote } from '../lib/types'
+import { ZONE } from '../lib/seed'
 import { SLOT_ORDER, sumNutrition } from '../lib/view'
 import { Db, ensureSchema, neonDb, Row, Statement } from './db'
 import { AppState, emptyDay, isoDate, StoredSlot } from './session'
@@ -62,14 +63,37 @@ function slotsFrom(rows: Row[]): StoredSlot[] {
 }
 
 export function createStore(db: Db, now: () => number = Date.now): Store {
-  async function load(date: string): Promise<AppState> {
+  // Read once per process, not per request. The zone changes when somebody moves
+  // house, which is rarer than a cold start by several orders of magnitude, and
+  // paying a round trip for it on every turn to catch that would be absurd.
+  let zoneMemo: string | null = null
+
+  async function homeZone(): Promise<string> {
+    if (zoneMemo) return zoneMemo
+    const [rows] = await db.batch([
+      { text: `select value from settings where key = 'zone'` },
+    ])
+    zoneMemo = rows[0] ? String(rows[0].value) : ZONE
+    return zoneMemo
+  }
+
+  async function load(date: string, zone: string): Promise<AppState> {
     // One source of truth for what an untouched day is, used both to create the
     // row and to fall back on. Seeding the row with the opening line matters:
     // left to the column default the day would exist with no conversation in it,
     // and the screen would open silent instead of asking.
-    const fresh = emptyDay(date)
-    const [, dayRows, itemRows, servedRows, trailingRows, pantryRows, outcomeRows, associationRows] =
-      await db.batch([
+    const fresh = emptyDay(date, undefined, [], zone)
+    const [
+      ,
+      dayRows,
+      itemRows,
+      servedRows,
+      trailingRows,
+      pantryRows,
+      outcomeRows,
+      associationRows,
+      noteRows,
+    ] = await db.batch([
         {
           text: `insert into days (the_date, eating, turns)
                  values ($1::date, $2::text[], $3::jsonb)
@@ -121,6 +145,16 @@ export function createStore(db: Db, now: () => number = Date.now): Store {
                         (extract(epoch from updated_at) * 1000)::float8 as updated_ms
                  from associations`,
         },
+        {
+          // Retired notes are left in the table and filtered out here, so that a
+          // dropped instruction is answerable rather than gone.
+          text: `select id, kind, note, raw, affirmed_count,
+                        (extract(epoch from created_at) * 1000)::float8 as created_ms,
+                        (extract(epoch from last_affirmed_at) * 1000)::float8 as affirmed_ms
+                 from standing_notes
+                 where retired_at is null
+                 order by created_at`,
+        },
       ])
 
     const day = dayRows[0]
@@ -163,8 +197,20 @@ export function createStore(db: Db, now: () => number = Date.now): Store {
       updatedAt: ms(r, 'updated_ms'),
     }))
 
+    const notes: StandingNote[] = noteRows.map(r => ({
+      id: String(r.id),
+      kind: r.kind as StandingNote['kind'],
+      text: String(r.note),
+      raw: String(r.raw),
+      createdAt: ms(r, 'created_ms'),
+      lastAffirmedAt: ms(r, 'affirmed_ms'),
+      affirmedCount: Number(r.affirmed_count),
+    }))
+
     return {
       ...fresh,
+      notes,
+      zone,
       eating: (day.eating as string[]) ?? fresh.eating,
       stage: day.stage as AppState['stage'],
       request: day.request as AppState['request'],
@@ -281,6 +327,50 @@ export function createStore(db: Db, now: () => number = Date.now): Store {
           ),
         ],
       },
+      // Anything dropped this turn is retired rather than deleted, so "you used
+      // to tell me X" stays answerable. Retiring by absence keeps the state on
+      // the turn as the single description of what is live.
+      {
+        text: `update standing_notes set retired_at = now()
+               where retired_at is null and id <> all($1::text[])`,
+        params: [state.notes.map(n => n.id)],
+      },
+      {
+        text: `insert into standing_notes
+                 (id, kind, note, raw, created_at, last_affirmed_at, affirmed_count)
+               select n.id, n.kind, n.note, n.raw,
+                      to_timestamp(n.created_ms / 1000.0),
+                      to_timestamp(n.affirmed_ms / 1000.0), n.affirmed_count
+               from jsonb_to_recordset($1::jsonb)
+                 as n(id text, kind text, note text, raw text, created_ms float8,
+                      affirmed_ms float8, affirmed_count int)
+               on conflict (id) do update set
+                 note = excluded.note,
+                 raw = excluded.raw,
+                 last_affirmed_at = excluded.last_affirmed_at,
+                 affirmed_count = excluded.affirmed_count,
+                 retired_at = null`,
+        params: [
+          JSON.stringify(
+            state.notes.map(n => ({
+              id: n.id,
+              kind: n.kind,
+              note: n.text,
+              raw: n.raw,
+              created_ms: n.createdAt,
+              affirmed_ms: n.lastAffirmedAt,
+              affirmed_count: n.affirmedCount,
+            }))
+          ),
+        ],
+      },
+      {
+        text: `insert into settings (key, value, updated_at)
+               values ('zone', $1::text, now())
+               on conflict (key) do update set
+                 value = excluded.value, updated_at = now()`,
+        params: [state.zone],
+      },
       // Append only. An edit is a thing that was said; nothing edits it later.
       {
         text: `insert into edit_events
@@ -326,7 +416,8 @@ export function createStore(db: Db, now: () => number = Date.now): Store {
     read: () =>
       serial(async () => {
         await ensureSchema(db)
-        const state = await load(isoDate(now()))
+        const zone = await homeZone()
+        const state = await load(isoDate(now(), zone), zone)
         // First boot: the library's general assumptions become rows so that a
         // correction has something to correct.
         if (!state.associations.length || state.associations === ASSOCIATIONS) {
@@ -335,7 +426,13 @@ export function createStore(db: Db, now: () => number = Date.now): Store {
         return state
       }),
 
-    write: state => serial(async () => void (await db.batch(writeStatements(state)))),
+    write: state =>
+      serial(async () => {
+        await db.batch(writeStatements(state))
+        // A turn that moved the kitchen invalidates the value this process has
+        // been reusing. Cheaper to drop it than to reason about whether it changed.
+        zoneMemo = state.zone
+      }),
 
     // Starts today again. It does not touch the past — a button on a screen is
     // not a reason to delete history, and the edits already logged record things
@@ -343,9 +440,10 @@ export function createStore(db: Db, now: () => number = Date.now): Store {
     reset: () =>
       serial(async () => {
         await ensureSchema(db)
-        const date = isoDate(now())
+        const zone = await homeZone()
+        const date = isoDate(now(), zone)
         await db.batch([{ text: `delete from days where the_date = $1::date`, params: [date] }])
-        return load(date)
+        return load(date, zone)
       }),
   }
 }

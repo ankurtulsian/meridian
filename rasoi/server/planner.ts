@@ -11,7 +11,7 @@ import { STAPLES } from '../lib/seed'
 import { DINERS } from '../lib/seed'
 import {
   ConstraintDimension, Dish, DinerId, EditEvent, EditKind, MealSlot, MenuItem, PantryItem,
-  ValidationResult,
+  ValidationResult, StandingNote,
 } from '../lib/types'
 import { DaySlot, validateDay, ValidationContext } from '../lib/validate'
 import {
@@ -262,6 +262,71 @@ export class PlanTurn {
         c => `${c.dimension}: ${c.value.startsWith('-') ? `no ${itemOf(c.value)}` : c.value}`
       ),
     }
+  }
+
+  // Told, not inferred. There is no evidence threshold here on purpose: the
+  // threshold in `rules.ts` exists because nobody said the rule out loud, and the
+  // whole point of this is that somebody did.
+  //
+  // Repeating a note does not stack it. A second "I'm in Dubai" is the same fact
+  // said twice — usually because the first one was not being honoured — so it
+  // bumps the count rather than creating a rival note that says the same thing.
+  remember(input: { kind: StandingNote['kind']; text: string; raw: string }): {
+    ok: true
+    stored: string
+    notes: string[]
+  } {
+    const same = this.state.notes.find(
+      n => n.text.trim().toLowerCase() === input.text.trim().toLowerCase()
+    )
+    if (same) {
+      same.raw = input.raw
+      same.lastAffirmedAt = this.now
+      same.affirmedCount += 1
+    } else {
+      this.state.notes = [
+        ...this.state.notes,
+        {
+          id: `n-${this.now}-${this.state.notes.length}-${Math.random().toString(36).slice(2, 6)}`,
+          kind: input.kind,
+          text: input.text,
+          raw: input.raw,
+          createdAt: this.now,
+          lastAffirmedAt: this.now,
+          affirmedCount: 1,
+        },
+      ]
+    }
+    return { ok: true, stored: input.text, notes: this.state.notes.map(n => n.text) }
+  }
+
+  // Dropping one is as ordinary as setting one — a thing that was true in March
+  // is not a thing you should have to live with in September. The row survives;
+  // only the belief stops.
+  forget(input: { text: string }): { ok: boolean; notes: string[]; error?: string } {
+    const wanted = input.text.trim().toLowerCase()
+    const match = this.state.notes.find(
+      n => n.text.trim().toLowerCase() === wanted || n.text.toLowerCase().includes(wanted)
+    )
+    if (!match) {
+      return { ok: false, error: 'No note like that.', notes: this.state.notes.map(n => n.text) }
+    }
+    this.state.notes = this.state.notes.filter(n => n.id !== match.id)
+    return { ok: true, notes: this.state.notes.map(n => n.text) }
+  }
+
+  // The one setting the code acts on rather than merely reads out. Changing it
+  // moves which calendar day a late dinner is filed under, so it is deliberately
+  // not something the model can do as a side effect of chat — it takes a named
+  // tool call, and it reads the change back.
+  setHome(input: { zone: string }): { ok: boolean; zone: string; error?: string } {
+    try {
+      new Intl.DateTimeFormat('en-CA', { timeZone: input.zone })
+    } catch {
+      return { ok: false, zone: this.state.zone, error: `${input.zone} is not a timezone name.` }
+    }
+    this.state.zone = input.zone
+    return { ok: true, zone: input.zone }
   }
 
   notePantry(input: {

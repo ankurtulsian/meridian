@@ -1,7 +1,7 @@
 import { Association } from '../lib/associations'
 import { emptyRequest } from '../lib/request'
 import { ZONE } from '../lib/seed'
-import { DinerId, EditEvent, MealSlot, MenuItem, Nutrition, PantryItem, PlateOutcome } from '../lib/types'
+import { DinerId, EditEvent, MealSlot, MenuItem, Nutrition, PantryItem, PlateOutcome, StandingNote } from '../lib/types'
 import { RequestState } from '../lib/request'
 import { SLOT_ORDER, Stage, Turn } from '../lib/view'
 
@@ -31,6 +31,13 @@ export interface AppState {
   lastServedAt: Record<string, number | null>
   trailingDays: Nutrition[]
   associations: Association[]
+  // Said out loud and true from the moment it was said. Unlike everything else
+  // here this is not scoped to the day — it is the memory that outlives it.
+  notes: StandingNote[]
+  // Where the kitchen is, as an IANA zone. Carried on the state rather than
+  // imported as a constant so that the day it changes, it changes everywhere that
+  // reads it — the clock in the prompt and the date the day is filed under.
+  zone: string
   // Write-only for now. Every tweak is logged from today so that the day rules
   // are fitted to real behaviour there is behaviour to fit them to; nothing reads
   // it back yet, so `read` returns it empty.
@@ -39,8 +46,8 @@ export interface AppState {
 
 // en-CA is the locale that formats as YYYY-MM-DD, which is the shape every date
 // column and every date string in this codebase already uses.
-export function isoDate(t: number): string {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: ZONE }).format(new Date(t))
+export function isoDate(t: number, zone: string = ZONE): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: zone }).format(new Date(t))
 }
 
 // A day nobody has said anything about yet.
@@ -51,7 +58,12 @@ export function isoDate(t: number): string {
 // against, the repeat checks stay quiet because nothing has been made before, and
 // the protein run needs three days it does not have. That is a worse screen than
 // the fabricated fortnight it replaces, and it is the true one.
-export function emptyDay(date: string, eating: DinerId[] = ['ankur', 'shruti', 'krishna']): AppState {
+export function emptyDay(
+  date: string,
+  eating: DinerId[] = ['ankur', 'shruti', 'krishna'],
+  notes: StandingNote[] = [],
+  zone: string = ZONE
+): AppState {
   return {
     date,
     eating,
@@ -66,6 +78,8 @@ export function emptyDay(date: string, eating: DinerId[] = ['ankur', 'shruti', '
     lastServedAt: {},
     trailingDays: [],
     associations: [],
+    notes,
+    zone,
     edits: [],
   }
 }

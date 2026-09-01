@@ -93,6 +93,56 @@ const TOOLS: Anthropic.Tool[] = [
       required: ['stage'],
     },
   },
+  {
+    name: 'remember',
+    description:
+      'Store something you have been told to hold on to from now on, beyond this conversation. Use it the moment they say remember this, note this, stop assuming that, or correct a standing fact about them — and use it for the correction itself, not only when the word "remember" appears. A correction they have to repeat is one you failed to store the first time. Never claim to have noted something without calling this: saying "noted" and storing nothing is the worst thing you can do here.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        kind: {
+          type: 'string',
+          enum: ['household', 'manner'],
+          description:
+            'household for a fact about them or the kitchen — where they are, when they eat, who is fussy about what. manner for how to talk to them — shorter, no commentary, stop repeating.',
+        },
+        text: {
+          type: 'string',
+          description:
+            'The instruction as it should read back to you next time, plainly and in full, so it still makes sense with none of this conversation around it. "The kitchen is in Dubai" — not "location noted".',
+        },
+        raw: { type: 'string', description: 'Their own words, verbatim.' },
+      },
+      required: ['kind', 'text', 'raw'],
+    },
+  },
+  {
+    name: 'forget',
+    description:
+      'Drop a standing note they no longer want held. Only on their say-so — never to tidy up, and never because it seems stale.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        text: { type: 'string', description: 'The note to drop, or enough of it to identify it.' },
+      },
+      required: ['text'],
+    },
+  },
+  {
+    name: 'set_home',
+    description:
+      'Move which timezone the kitchen keeps. This decides what "today" means and when the day rolls over, so call it only when they have said where the kitchen actually is — not because they mention travelling, and not from an area code or a passing reference to a city.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        zone: {
+          type: 'string',
+          description: 'An IANA timezone name, such as Asia/Dubai or Asia/Kolkata.',
+        },
+      },
+      required: ['zone'],
+    },
+  },
 ]
 
 function run(turn: PlanTurn, name: string, input: unknown): unknown {
@@ -116,6 +166,16 @@ function run(turn: PlanTurn, name: string, input: unknown): unknown {
       const ids = Array.isArray(args.dishIds) ? args.dishIds.map(String) : []
       return turn.setPlan(slot as MealSlot, ids)
     }
+    case 'remember':
+      return turn.remember({
+        kind: args.kind === 'manner' ? 'manner' : 'household',
+        text: String(args.text ?? ''),
+        raw: String(args.raw ?? ''),
+      })
+    case 'forget':
+      return turn.forget({ text: String(args.text ?? '') })
+    case 'set_home':
+      return turn.setHome({ zone: String(args.zone ?? '') })
     case 'stage':
       return turn.setStage(args.stage === 'confirmed' ? 'confirmed' : 'converged')
     default:

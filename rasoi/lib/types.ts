@@ -340,3 +340,38 @@ export interface InboxItem {
   status: 'new' | 'triaged' | 'accepted' | 'dismissed' | 'expired'
   addedAt: number
 }
+
+// Something told once that has to hold afterwards.
+//
+// Distinct from a Rule, and the distinction is the whole point. A Rule is
+// *inferred* — fitted from repeated edits, and proposed for approval because
+// nobody said it out loud. A StandingNote is the opposite: said out loud,
+// deliberately, and true from the moment it is said. "I'm in Dubai." "Don't
+// assume I've eaten." "Keep it short." None of those want an evidence threshold;
+// they want to be obeyed.
+//
+// So this is the one thing in the system that takes effect without being
+// proposed back — because being told is the proposal. What it still owes is
+// visibility: it is read back when it is set, and it can be dropped by saying so.
+export interface StandingNote {
+  id: string
+  // `household` is a fact about them or the kitchen — where they are, who eats
+  // what, when they eat. `manner` is about how to talk to them. The split exists
+  // because they are read in different places: a household fact is context for
+  // every decision, a manner note is an instruction about the reply.
+  kind: 'household' | 'manner'
+  // The instruction as it will be read back to the model, in the plainest form
+  // that survives being quoted out of context. Not a paraphrase that loses the
+  // point — "the kitchen is in Dubai", not "location noted".
+  text: string
+  // Their own words. Kept for the same reason the edit log keeps them: the
+  // phrasing is evidence, and a tidied version of a sentence is a different
+  // sentence.
+  raw: string
+  createdAt: number
+  // Bumped when it is repeated. A note said three times is one note, not three,
+  // but the repetition is worth knowing about — it usually means it is not being
+  // honoured.
+  lastAffirmedAt: number
+  affirmedCount: number
+}
