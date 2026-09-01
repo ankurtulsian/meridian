@@ -102,8 +102,8 @@ export const SCHEMA = [
   `create table if not exists standing_notes (
      id               text primary key,
      kind             text not null,
-     -- Named `note` rather than `text`: a column called text, of type text, is
-     -- legal and reads badly everywhere it appears in a query.
+     -- Named note rather than text: a column called text, of type text, is legal
+     -- and reads badly everywhere it appears in a query.
      note             text not null,
      raw              text not null,
      created_at       timestamptz not null default now(),
