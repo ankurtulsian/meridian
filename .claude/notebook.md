@@ -57,6 +57,24 @@ deletion broke nothing. It is green.
 The notebook's decisions log and process notes were deliberately left intact. Decision 39
 records the deletion and supersedes 19 rather than rewriting it.
 
+## About Ankur
+
+Facts that every session needs and that were never written down. The absence of this
+section is why "Delhi" survived a week: it was invented in a WIP commit, hardcoded in the
+prompt and the timezone constant, and never recorded as a decision — so there was nothing
+for a later session to check it against.
+
+| Fact | Source | Confidence |
+|---|---|---|
+| Lives in **Dubai** | Said it directly, 31 Aug, correcting Rasoi | Stated by Ankur |
+| Whether the **kitchen** is in Dubai too — the cook, Shruti, Krishna | Not asked | **Unknown.** Decides when the day rolls over; do not guess it |
+| Household is Ankur, Shruti and their son Krishna | Throughout | Stated by Ankur |
+| Cook reads and speaks Hindi | Throughout | Stated by Ankur |
+| Works in the browser only; no local machine | Decision D12 | Stated by Ankur |
+
+Nothing here is inferred. Anything that cannot be sourced to Ankur saying it does not belong
+in this table — that is the entire lesson of the Delhi episode.
+
 ## Parking lot
 
 | # | Thread | Raised | Disposition | Note |
@@ -204,6 +222,19 @@ working style had been read.
 Cause: the notebook was treated as a file like any other, so ordinary git tidying was allowed
 to discard it. A note that exists only in a commit that may be rewritten is not durable.
 Anything logged before a rebase gets re-checked after it.
+
+**31 Aug — "Delhi" was invented and survived a week because nothing recorded it.**
+Ankur asked where Delhi came from. It came from Claude: it entered in `6427662 WIP: thin
+vertical slice, mid-review`, was hardcoded in the first line of the system prompt and in
+`ZONE`, and carried a confident comment explaining why it mattered. No decision in any
+version of this notebook mentions a location. Ankur was never asked.
+
+It then produced the failure he actually saw — Rasoi telling him lunch had gone at four,
+Indian time, while he was in Dubai at 2:30.
+
+Cause, and it is the same one as the invented thresholds: a plausible specific was written
+down as though it had been settled. The guard is the About Ankur table above — a fact about
+him is either sourced to him saying it, or it is not recorded as a fact.
 
 **29 Aug — the protocol was held in context but not invoked.** The skill was never run, no
 session-start check-in was run, and the copy loaded from `main` turned out to be older than
