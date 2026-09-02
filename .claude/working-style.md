@@ -1,4 +1,48 @@
+---
+name: working-style
+description: Ankur's standing engagement protocol — how threads are triaged, sequenced, communicated, delegated and closed with him. Invoke at the START of every session before doing anything else, and again whenever a new thread arrives, a thread switch is being considered, work is about to be delegated, or the project has no notebook. Applies to all project work regardless of size, in every project, not just the one it was written in.
+---
+
 # Working Style
+
+**Invoke this at the start of every session.** It governs how the work is run, not what the
+work is.
+
+## First action in any project
+
+Check whether the project has `.claude/notebook.md`.
+
+**If it does:** read it. It is the durable record of open threads, decisions and what is
+blocked on whom. Rehydrate from it before doing anything else.
+
+**If it does not:** create it, unprompted — Ankur is never expected to ask. Use this shape:
+
+```markdown
+# Notebook — <project>
+
+Live engagement record **for this project only**. Read at session start. Updated as threads
+move, not reconstructed at the end.
+
+**Last updated:** <date>
+
+## Active thread
+<one thread, with its exit criterion and status>
+
+## Parking lot
+| # | Thread | Raised | Disposition | Note |
+
+## Blocked on Ankur
+## Blocked on others
+
+## Decisions log
+| # | Decision | Date | Rationale |
+```
+
+Then copy this protocol into the project as `.claude/working-style.md`, add a `## How we work`
+section to the project's `CLAUDE.md` importing both files, and offer `/check-in` as a project
+skill. The project copy is what guarantees the protocol loads even when this one does not fire.
+
+---
 
 How Ankur and Claude work together. **Living document** — expected to be wrong in places
 and revised as we hit real cases. Amendments go in the log at the bottom.

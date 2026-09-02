@@ -1,13 +1,40 @@
-# Meridian
+# Rasoi
 
-Mobile-first AI concierge for restaurant discovery in Dubai. Next.js + TypeScript.
-Setup, environment variables, and deployment: see `README.md`.
+Daily menu planning for the house. Next.js + TypeScript, living in `rasoi/`.
+
+The repository is named `meridian` for historical reasons — it began as a different app, and
+the name was kept so existing paths keep working. Rasoi is the only app here.
+
+## The app
+
+A household menu planner for Ankur, Shruti and Krishna, with instructions handed to a cook
+who reads and speaks Hindi. The design is recorded in a service schema published as an
+artifact; the notebook tracks what is decided and what is open.
+
+`rasoi/` is self-contained — its own `package.json`, dependencies and build — so it lifts out
+whole. `rasoi/lib/` holds the domain model and is deliberately **pure** — it imports nothing,
+calls nothing, and knows about neither React nor any model API. Keep it that way: it is what
+lets the screen or the model change without disturbing the rules, and it is testable without
+mocking anything.
+
+| File | Holds |
+|---|---|
+| `types.ts` | Domain model — dishes, diners, day plans, edits, rules, sources |
+| `scoring.ts` | Ranking. Gates are rare; nearly everything is a weighted preference |
+| `validate.ts` | Deterministic checks across a whole day, separate from generation |
+| `request.ts` | The live request as explicit state, so contradictions surface |
+| `rules.ts` | How a repeated tweak becomes a habit, and how habits are challenged |
+| `flavour.ts` | Macros as lighter/ordinary/heavier against the household's own average |
+| `seed.ts` | The three diners and the assumed-stocked staples |
+
+`rasoi/design/` holds the phone screens as editable artboards, seeded into a published canvas.
+
+Two principles run through it: the system never claims to know more than it does, and it
+proposes rather than silently applying.
+
+Deployment, and the environment variables it needs, are in `rasoi/DEPLOY.md`.
 
 ## How we work
-
-The engagement protocol below is not optional context — it governs how work is sequenced,
-communicated, and delegated in this repo. Read the notebook at session start to rehydrate
-open threads before doing anything else.
 
 @.claude/working-style.md
 

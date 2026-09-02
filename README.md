@@ -1,74 +1,19 @@
-# Meridian — Your Dubai Concierge
+# Rasoi
 
-A mobile-first AI concierge for restaurant discovery in Dubai.
+Daily menu planning for the house — what gets cooked, settled by talking rather than by
+filling in a form, with the instructions handed to a cook who reads and speaks Hindi.
 
-## Setup
+The repository is named `meridian` for historical reasons: it began as a different app, and
+the name was kept so existing clones, paths and bookmarks keep working. That app has been
+deleted — only the name remains.
 
-### 1. Install dependencies
-```bash
-npm install
-```
+| Path | What it is |
+|---|---|
+| `rasoi/` | The app. Self-contained: its own `package.json`, its own build. |
+| `rasoi/DEPLOY.md` | How it is deployed, and the environment variables it needs. |
+| `rasoi/design/` | The phone screens as editable artboards. |
 
-### 2. Add your API keys
-Create a `.env.local` file in the root:
-```
-ANTHROPIC_API_KEY=your_anthropic_api_key_here
-GOOGLE_PLACES_API_KEY=your_google_places_api_key_here
-```
+Because the app sits in `rasoi/` rather than at the root, anything building this repository
+has to be pointed at that folder. `rasoi/DEPLOY.md` covers it.
 
-### 3. Run locally
-```bash
-npm run dev
-```
-Open http://localhost:3000 on your phone (same WiFi network) or browser.
-
----
-
-## Deploy to Vercel (live iPhone URL)
-
-### Option A — Vercel CLI (fastest)
-```bash
-npm install -g vercel
-vercel
-```
-Follow the prompts. When asked about environment variables, add both keys.
-
-### Option B — GitHub + Vercel dashboard
-1. Push this folder to a GitHub repo
-2. Go to vercel.com → New Project → import your repo
-3. Under Settings → Environment Variables, add:
-   - `ANTHROPIC_API_KEY`
-   - `GOOGLE_PLACES_API_KEY`
-4. Deploy — you get a live URL instantly
-
-### Add to iPhone home screen
-1. Open the Vercel URL in Safari on your iPhone
-2. Tap the Share button (box with arrow)
-3. Tap "Add to Home Screen"
-4. Tap "Add"
-
-Meridian now lives on your home screen as a full-screen app.
-
----
-
-## Google Places API setup
-1. Go to console.cloud.google.com
-2. Create a new project
-3. Go to APIs & Services → Library
-4. Enable "Places API (New)"
-5. Go to Credentials → Create API Key
-6. (Optional but recommended) Restrict the key to your Vercel domain
-
----
-
-## What's built
-
-- **Ask tab** — conversational concierge with Claude. Voice + text input. AI-generated chips. Returns ranked restaurant results with concierge blurbs.
-- **All tab** — browse all Dubai restaurants with cuisine filters and search.
-- **Saved tab** — your personal shortlist, persisted in session.
-
-## Next iterations
-- User accounts + persistent memory across sessions
-- Feedback loop (post-visit rating → ranking signal)
-- Booking confirmation via human/AI agent
-- More verticals (experiences, lifestyle, home services)
+See `CLAUDE.md` for how the work is run and `.claude/notebook.md` for what is open.

@@ -1,0 +1,33 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# next.js
+.next/
+out/
+build/
+dist/
+
+# secrets — see rasoi/DEPLOY.md for the variables the app needs
+.env
+.env*.local
+
+# typescript build output
+*.tsbuildinfo
+
+# vercel
+.vercel
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# os
+.DS_Store
+*.pem
+
+# generated design output — rebuild from the .dc.html artboards, see rasoi/design/README.md
+rasoi/design/rasoi-screens.html
+rasoi/design/rasoi-screens-preview.html

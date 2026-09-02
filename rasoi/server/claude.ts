@@ -1,0 +1,319 @@
+import Anthropic from '@anthropic-ai/sdk'
+import { MealSlot, PantryItem } from '../lib/types'
+import { Emit } from './events'
+import { ConstraintInput, PlanTurn, slotOf, TurnOutcome } from './planner'
+import { LIBRARY_BLOCK, stateBlock, SYSTEM_CORE } from './prompt'
+import { AppState } from './session'
+
+const MODEL = 'claude-opus-5'
+const MAX_ITERATIONS = 8
+
+// Fixed order, fixed shape. Tools render at position 0 of the prompt, so a set
+// that varies between requests would invalidate the cache for everything behind
+// it — including the dish library, which is the part worth caching.
+const TOOLS: Anthropic.Tool[] = [
+  {
+    name: 'state_constraint',
+    description:
+      'Record something they have said about what they want, so it competes in the ranking and so a later statement that contradicts it can be named rather than silently resolved. One value per dimension, and a new one replaces the old — except ingredients, where each item is tracked separately, so ruling out onions does not undo asking for the paneer.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        dimension: {
+          type: 'string',
+          enum: ['diners', 'slot', 'mood', 'nutrition', 'ingredient', 'effort', 'variety', 'occasion'],
+        },
+        value: {
+          type: 'string',
+          description:
+            'Depends on the dimension. For mood, nutrition and occasion, a facet from the fixed vocabulary. For ingredient, the ingredient in lowercase — prefixed with a minus to rule it out, so "use up the paneer" is "paneer" and "no onions" is "-onion". For effort, one of low, quick, easy, simple, weeknight, high, elaborate, proper, project. For variety, one of new, different, change, usual, familiar, favourite.',
+        },
+        raw: { type: 'string', description: 'Their own words, verbatim.' },
+        strength: {
+          type: 'string',
+          enum: ['gate', 'preference'],
+          description: 'Almost always preference. A gate eliminates dishes outright and is for genuine non-negotiables only.',
+        },
+      },
+      required: ['dimension', 'value', 'raw', 'strength'],
+    },
+  },
+  {
+    name: 'note_pantry',
+    description:
+      'Record something they have said is in the house. Only ever what they actually said — nothing here is inferred from a plan or a shopping list. Ingredients in the pantry tilt the ranking towards using them up.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        item: { type: 'string', description: 'The ingredient, lowercase, as it would appear in a recipe: bhindi, paneer, lauki.' },
+        quantitySignal: { type: 'string', enum: ['a little', 'some', 'a lot'] },
+        raw: { type: 'string', description: 'Their own words, verbatim.' },
+      },
+      required: ['item', 'quantitySignal', 'raw'],
+    },
+  },
+  {
+    name: 'shortlist',
+    description:
+      'Order everything the kitchen could put in a meal, given what was cooked recently, what is in the house, what they have asked for and who is eating. This is the whole eligible library in order, not a selection from it — every dish comes back, each with the reasons behind where it landed. The order is advice, not a ruling: something halfway down is a perfectly good answer when the reasons say so, and the weights behind the ordering are estimates nobody has yet fitted to real choices. Read the reasons, not the number. You must call this before naming a dish for a meal, and you may only plan dishes it has returned.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        slot: { type: 'string', enum: ['breakfast', 'lunch', 'snacks', 'dinner'] },
+        satisfying: {
+          type: 'array',
+          items: { type: 'string' },
+          description:
+            'Optional. Narrows the field to dishes that would answer a particular gap — pass the options from a breach, such as roti or rice for a dal with no carb beside it. Without this the plain staples rarely surface: they match no mood and are cooked constantly, so the ranking buries them.',
+        },
+      },
+      required: ['slot'],
+    },
+  },
+  {
+    name: 'set_plan',
+    description:
+      'Put dishes into a meal, replacing whatever was there. Every id must have come back from shortlist this turn, or already be in that meal. Returns the balance findings for the whole day, the day\'s flavour in one sentence, anything that needs buying, and any dish left without the thing that usually goes beside it.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        slot: { type: 'string', enum: ['breakfast', 'lunch', 'snacks', 'dinner'] },
+        dishIds: { type: 'array', items: { type: 'string' } },
+      },
+      required: ['slot', 'dishIds'],
+    },
+  },
+  {
+    name: 'stage',
+    description:
+      'Mark where the agreement stands. "converged" when the plan has stopped moving and you are about to ask whether to send it. "confirmed" only after they have answered that question with a yes. Confirming without having asked is refused.',
+    input_schema: {
+      type: 'object',
+      properties: { stage: { type: 'string', enum: ['converged', 'confirmed'] } },
+      required: ['stage'],
+    },
+  },
+  {
+    name: 'remember',
+    description:
+      'Store something you have been told to hold on to from now on, beyond this conversation. Use it the moment they say remember this, note this, stop assuming that, or correct a standing fact about them — and use it for the correction itself, not only when the word "remember" appears. A correction they have to repeat is one you failed to store the first time. Never claim to have noted something without calling this: saying "noted" and storing nothing is the worst thing you can do here.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        kind: {
+          type: 'string',
+          enum: ['household', 'manner'],
+          description:
+            'household for a fact about them or the kitchen — where they are, when they eat, who is fussy about what. manner for how to talk to them — shorter, no commentary, stop repeating.',
+        },
+        text: {
+          type: 'string',
+          description:
+            'The instruction as it should read back to you next time, plainly and in full, so it still makes sense with none of this conversation around it. "The kitchen is in Dubai" — not "location noted".',
+        },
+        raw: { type: 'string', description: 'Their own words, verbatim.' },
+      },
+      required: ['kind', 'text', 'raw'],
+    },
+  },
+  {
+    name: 'forget',
+    description:
+      'Drop a standing note they no longer want held. Only on their say-so — never to tidy up, and never because it seems stale.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        text: { type: 'string', description: 'The note to drop, or enough of it to identify it.' },
+      },
+      required: ['text'],
+    },
+  },
+  {
+    name: 'set_home',
+    description:
+      'Move which timezone the kitchen keeps. This decides what "today" means and when the day rolls over, so call it only when they have said where the kitchen actually is — not because they mention travelling, and not from an area code or a passing reference to a city.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        zone: {
+          type: 'string',
+          description: 'An IANA timezone name, such as Asia/Dubai or Asia/Kolkata.',
+        },
+      },
+      required: ['zone'],
+    },
+  },
+]
+
+function run(turn: PlanTurn, name: string, input: unknown): unknown {
+  const args = (input ?? {}) as Record<string, unknown>
+  switch (name) {
+    case 'state_constraint':
+      return turn.stateConstraint(args as unknown as ConstraintInput)
+    case 'note_pantry':
+      return turn.notePantry(
+        args as unknown as { item: string; quantitySignal: PantryItem['quantitySignal']; raw: string }
+      )
+    case 'shortlist': {
+      const slot = slotOf(String(args.slot))
+      if (!slot) return { error: 'Unknown meal.' }
+      const satisfying = Array.isArray(args.satisfying) ? args.satisfying.map(String) : undefined
+      return turn.shortlist(slot, satisfying)
+    }
+    case 'set_plan': {
+      const slot = slotOf(String(args.slot))
+      if (!slot) return { error: 'Unknown meal.' }
+      const ids = Array.isArray(args.dishIds) ? args.dishIds.map(String) : []
+      return turn.setPlan(slot as MealSlot, ids)
+    }
+    case 'remember':
+      return turn.remember({
+        kind: args.kind === 'manner' ? 'manner' : 'household',
+        text: String(args.text ?? ''),
+        raw: String(args.raw ?? ''),
+      })
+    case 'forget':
+      return turn.forget({ text: String(args.text ?? '') })
+    case 'set_home':
+      return turn.setHome({ zone: String(args.zone ?? '') })
+    case 'stage':
+      return turn.setStage(args.stage === 'confirmed' ? 'confirmed' : 'converged')
+    default:
+      return { error: `No such tool: ${name}` }
+  }
+}
+
+// Some deployments reject a mid-conversation system message. Remembered per
+// process so the fallback is paid for once rather than every turn.
+let midConversationSystemWorks = true
+
+function buildMessages(
+  state: AppState,
+  userText: string,
+  now: Date,
+  useSystemRole: boolean
+): Anthropic.MessageParam[] {
+  // The transcript opens with the system speaking; the API needs a user turn
+  // first, so that greeting is dropped rather than reordered.
+  const history = [...state.turns]
+  while (history.length && history[0].role === 'assistant') history.shift()
+
+  const block = stateBlock(state, now)
+  const messages: Anthropic.MessageParam[] = history.map(t => ({
+    role: t.role,
+    content: t.text,
+  }))
+
+  if (useSystemRole) {
+    messages.push({ role: 'user', content: userText })
+    // The non-spoofable operator channel, and — because it sits after the cached
+    // history rather than in front of it — the placement that leaves the cache
+    // intact.
+    messages.push({ role: 'system', content: block } as Anthropic.MessageParam)
+  } else {
+    messages.push({ role: 'user', content: `<state>\n${block}\n</state>\n\n${userText}` })
+  }
+  return messages
+}
+
+export function hasApiKey(): boolean {
+  return Boolean(process.env.ANTHROPIC_API_KEY)
+}
+
+// An Anthropic key is either scoped to a workspace or linked to a person. The
+// second kind refuses to act until it is told which workspace it is acting in,
+// and says so in a 400 whose wording is Anthropic's rather than ours. Left
+// alone it reaches the screen as raw JSON, which tells the person who typed the
+// variable nothing about which variable or where.
+export class WorkspaceNotChosen extends Error {
+  constructor() {
+    super(
+      'The Anthropic key is linked to a person rather than to a workspace, so it ' +
+        'will not run until it is told which workspace to work in. Either way ' +
+        'fixes it: on console.anthropic.com create a normal workspace key and ' +
+        'replace ANTHROPIC_API_KEY with it, or keep this key and add ' +
+        'ANTHROPIC_WORKSPACE_ID with the workspace id. On Vercel: Settings → ' +
+        'Environment Variables, then redeploy.'
+    )
+    this.name = 'WorkspaceNotChosen'
+  }
+}
+
+export async function converse(
+  state: AppState,
+  userText: string,
+  emit: Emit,
+  now: number = Date.now()
+): Promise<TurnOutcome> {
+  const client = new Anthropic()
+  const turn = new PlanTurn(state, now)
+  turn.addTurn('user', userText)
+
+  let messages = buildMessages(state, userText, new Date(now), midConversationSystemWorks)
+  let spoken = ''
+
+  for (let i = 0; i < MAX_ITERATIONS; i++) {
+    let final: Anthropic.Message
+    try {
+      const stream = client.messages.stream({
+        model: MODEL,
+        max_tokens: 8000,
+        thinking: { type: 'adaptive' },
+        output_config: { effort: 'medium' },
+        system: [
+          { type: 'text', text: SYSTEM_CORE },
+          // Everything above this line is byte-identical on every turn of every
+          // conversation. Everything below it is not.
+          { type: 'text', text: LIBRARY_BLOCK, cache_control: { type: 'ephemeral' } },
+        ],
+        tools: TOOLS,
+        messages,
+      })
+      stream.on('text', delta => {
+        spoken += delta
+        emit({ t: 'text', v: delta })
+      })
+      final = await stream.finalMessage()
+    } catch (error) {
+      if (
+        error instanceof Anthropic.BadRequestError &&
+        midConversationSystemWorks &&
+        /role 'system'|role "system"/i.test(error.message)
+      ) {
+        // Retry once with the state folded into the user turn instead.
+        midConversationSystemWorks = false
+        messages = buildMessages(state, userText, new Date(now), false)
+        i--
+        continue
+      }
+      if (
+        error instanceof Anthropic.BadRequestError &&
+        /anthropic-workspace-id/i.test(error.message)
+      ) {
+        throw new WorkspaceNotChosen()
+      }
+      throw error
+    }
+
+    if (final.stop_reason === 'pause_turn') {
+      messages = [...messages, { role: 'assistant', content: final.content }]
+      continue
+    }
+
+    const calls = final.content.filter(
+      (b): b is Anthropic.ToolUseBlock => b.type === 'tool_use'
+    )
+    if (!calls.length) break
+
+    messages = [...messages, { role: 'assistant', content: final.content }]
+    const results: Anthropic.ToolResultBlockParam[] = calls.map(call => ({
+      type: 'tool_result',
+      tool_use_id: call.id,
+      content: JSON.stringify(run(turn, call.name, call.input)),
+    }))
+    messages = [...messages, { role: 'user', content: results }]
+  }
+
+  turn.addTurn('assistant', spoken.trim() || '…')
+  return turn.finish()
+}
