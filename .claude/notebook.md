@@ -39,6 +39,19 @@ The URL sits behind a Vercel login, so Shruti cannot open it and neither can the
 Turning it off makes the link itself the only access, since Rasoi has no login of its own.
 Ankur's call; asked 29 Aug, not yet answered.
 
+**Learned the hard way, 31 Aug:** a push to this branch builds but does not go live. Vercel
+only moves the production alias when something explicitly promotes it, and for a while
+`rasoi-phi.vercel.app` was serving a commit from before the memory work while three green
+builds sat unused. Until the branch is on `main`, every deploy needs an explicit production
+push — which is itself the best argument for merging.
+
+**Open, and Ankur's call:** the placeholder register. Sixteen invented numbers, none marked
+as provisional, including the three flexibility scores that decide how much Shruti and
+Krishna get accommodated when tastes collide. His framing, and it is sharper than the one
+first written here: the failure is not inventing a value, it is using a placeholder and
+forgetting it was one. Proposed fix is to make them declare themselves in code so adding one
+costs a sentence about what would settle it. Not started.
+
 **Still to do:** fold this branch into `main`. Ankur approved it; the deploy was run from the
 branch first so a broken build could not land on the main line. Now that two builds are
 green there is no reason to wait.
@@ -282,6 +295,7 @@ this branch's. Having the text in context was treated as equivalent to following
 | 36 | Staples are exempt from repeat warnings, not from ranking | 28 Aug | Roti is made daily; warning about it trains you to ignore findings. It still sinks in the ranking. |
 | 37 | A dish's place in the rotation is its own property | 28 Aug | Not its ingredients — khichdi is made entirely of staples and is still worth rotating. |
 | 38 | Ranking orders the field; it never shortens it | 28 Aug | Ankur's worry about invented weights. A wrong weight should cost sort order, not silently remove half the library from consideration. |
+| 42 | The working style's conversational half lives in Rasoi's prompt | 31 Aug | Ankur's request. Nine rules about how he wants to be talked to, imported into the cached prefix; the engagement machinery — triage, delegation, the notebook — deliberately left out, because Rasoi plans dinner rather than running a workstream. Placed in the prompt rather than seeded as standing notes so they cannot be dropped by accident, but anything he says outranks them: the notes are read after this section. |
 | 41 | The kitchen is in Dubai; Asia/Dubai is the default, not the truth | 31 Aug | Ankur's answer, asked because Delhi had been invented and nobody could check it. The default in `seed.ts` moves to Asia/Dubai, but the live value lives in the settings table and is changed by telling Rasoi — so the next time it is wrong, it is fixed in the app rather than in a constant nobody thinks to look at. |
 | 40 | The link is the access; no login of Rasoi's own | 29 Aug | Ankur's call, to bring Shruti in. Vercel's login was the only gate and it cannot admit anyone outside a paid team. Rasoi has no accounts of its own and does not need them for a household of three — the unguessable URL is the credential. Cost control moves to a spend cap on the Anthropic key rather than to access control. |
 | 39 | The restaurant app deleted outright, superseding 19 | 29 Aug | Ankur's call. Archiving still left a dead Next.js app, its dependencies and its config sitting at the repository root, where a build tool or a reader meets it first. The repository keeps the name `meridian`, so nothing Ankur has cloned or bookmarked changes. |
