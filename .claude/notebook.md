@@ -3,7 +3,7 @@
 Live engagement record **for this project only**. Read at session start. Updated as threads
 move, not reconstructed at the end.
 
-**Last updated:** 2026-08-29
+**Last updated:** 2026-09-06
 
 ## Active thread
 
@@ -88,6 +88,39 @@ for a later session to check it against.
 Nothing here is inferred. Anything that cannot be sourced to Ankur saying it does not belong
 in this table — that is the entire lesson of the Delhi episode.
 
+## What the household eats
+
+Given by Ankur 6 Sep, played back, corrected and confirmed. Same rule as the table above:
+this is his, in his words condensed — nothing here is inferred, and the one phrase that could
+not be transcribed was dropped rather than guessed at.
+
+**What they are.** North Indian Marwari, the home version — what gets cooked in Marwari homes,
+not classical Rajasthani.
+
+**The four constants.** Flavourful but never hot (chilli, not temperature). Medium oil —
+neither oil-free nor oily. No meal without protein and fibre, for all three of them. And they
+like food interesting: for this household routine is a failure, not a safe default.
+
+**The week.**
+
+| | |
+|---|---|
+| Breakfast | Omelette with bread (avocado optional), poha, or a chilla. Krishna's rotates — pancake, oatmeal, egg omelette — **generally, not only Sundays** |
+| Lunch | Roti or paratha with a sabzi; the bread varies too. Sabzis: louki, louki with chana, coconut-milk curry with raw papaya |
+| Dinner | Rice-based, and where they leave North India on purpose — sambar rice, lemon rice, Thai curry, ramen, rajma patty burger |
+| Weekly | One full South Indian meal: dosa, sambar, chutney |
+| Sunday dinner | Pasta for Krishna |
+| Indulgences | Paneer, dal tadka, biryani — weekends or dinner |
+
+**Krishna — live, not settled.** He will not eat dal as a separate thing and they want that
+changed, not permanently worked around. What works today: dal worked into the aata so the
+roti carries it. Current days are dal-roti with a veggie and sometimes yoghurt, then khichdi
+with egg in the evening. They want variations on that, not those two on repeat.
+
+*Transcription note:* "louki", "papaya" and "rajma patty burger" were misheard first time and
+confirmed by Ankur. One phrase — "if it's a one two" — was unparseable; he told me to drop it
+rather than have it guessed at.
+
 ## Parking lot
 
 | # | Thread | Raised | Disposition | Note |
@@ -103,7 +136,7 @@ in this table — that is the entire lesson of the Delhi episode.
 | 11 | Meridian's Google Maps key reaches the browser | 29 Aug | **Still open — files gone, key not revoked** | `Meridian_archived/src/lib/places.ts` builds photo URLs with `key=<the API key>` and sends them to the client, so anyone opening that app could read it and spend Ankur's Google credit. Not urgent: the app is archived and is not being deployed. The key is live in his Google account regardless, and is in the repository's history. Raised with Ankur 29 Aug, who had no preference while it was the app going live; the question is now whether to fix or leave. **Updated 29 Aug:** the restaurant app was deleted from the working tree, so nothing in the repository now hands the key to a browser. That is not a fix. The key is still live in Ankur's Google Cloud account, and it is still readable in this repository's git history — deleting a file does not remove it from the commits that contain it. Revoking or restricting the key remains an action only Ankur can take. |
 | 10 | Screens — Ankur and Shruti's reaction | 28 Aug | Open | Four artboards reviewed and rendered. No reaction yet from either of them; the slice is being built against them meanwhile. |
 | 7 | Integrations and services mapped | 28 Aug | Answered inline | Under $25/mo all-in, nearly all of it Claude. Offered to fold into the schema page; Ankur has not said either way. |
-| 8 | Should a menu follow a structure — a carb, something wet, something green | 28 Aug | Parked by Ankur | His words: figure out later. Nothing built for it; the generator stays unstructured until he says otherwise. |
+| 8 | Should a menu follow a structure — a carb, something wet, something green | 28 Aug | **Closed 6 Sep — he answered it** | He parked it with "figure out later"; describing the week answered it without being asked again. There *is* a structure: lunch is bread-led, dinner is rice-led, and every meal carries protein and fibre. Captured in the profile above and in the prompt. **Not yet in the ranker** — the generator still has no structural preference, so this is now a build item rather than an open question. |
 | 9 | What Krishna actually eats at dinner | 28 Aug | Closed — not a question | His food varies like anyone's. Learned through use and decaying signals, never configured. Mockup placeholders stand until there is an app to fill them. |
 | 7 | Integrations and services mapped | 28 Aug | Answered inline | Under $25/mo all-in, nearly all of it Claude. Offered to fold into the schema page; Ankur has not said either way. |
 
@@ -295,6 +328,8 @@ this branch's. Having the text in context was treated as equivalent to following
 | 36 | Staples are exempt from repeat warnings, not from ranking | 28 Aug | Roti is made daily; warning about it trains you to ignore findings. It still sinks in the ranking. |
 | 37 | A dish's place in the rotation is its own property | 28 Aug | Not its ingredients — khichdi is made entirely of staples and is still worth rotating. |
 | 38 | Ranking orders the field; it never shortens it | 28 Aug | Ankur's worry about invented weights. A wrong weight should cost sort order, not silently remove half the library from consideration. |
+| 44 | The household's food profile is recorded and reaches every conversation | 6 Sep | Ankur described the week, the taste and Krishna's dal problem, then confirmed the playback. Written into the prompt's cached prefix rather than seeded as standing notes, because it is stable and he told it to Claude rather than to Rasoi — but the notes still outrank it, so correcting it in the app works and does not need a code change. |
+| 43 | Crawl for sources against the profile; D12 superseded | 6 Sep | Ankur's reversal, confirmed explicitly. D12 held that recipes come only from sources they already follow, because the source list *was* the taste filter. Now the profile is the filter, and he does not want the search limited to what he can remember to name. He may still give sources; they are a starting point, not a boundary. |
 | 42 | The working style's conversational half lives in Rasoi's prompt | 31 Aug | Ankur's request. Nine rules about how he wants to be talked to, imported into the cached prefix; the engagement machinery — triage, delegation, the notebook — deliberately left out, because Rasoi plans dinner rather than running a workstream. Placed in the prompt rather than seeded as standing notes so they cannot be dropped by accident, but anything he says outranks them: the notes are read after this section. |
 | 41 | The kitchen is in Dubai; Asia/Dubai is the default, not the truth | 31 Aug | Ankur's answer, asked because Delhi had been invented and nobody could check it. The default in `seed.ts` moves to Asia/Dubai, but the live value lives in the settings table and is changed by telling Rasoi — so the next time it is wrong, it is fixed in the app rather than in a constant nobody thinks to look at. |
 | 40 | The link is the access; no login of Rasoi's own | 29 Aug | Ankur's call, to bring Shruti in. Vercel's login was the only gate and it cannot admit anyone outside a paid team. Rasoi has no accounts of its own and does not need them for a household of three — the unguessable URL is the credential. Cost control moves to a spend cap on the Anthropic key rather than to access control. |
